@@ -1,4 +1,4 @@
-var data = document.querySelector("pre").innerHTML;
+var data = $("pre")[0].innerHTML;
 var port = chrome.runtime.connect({ name : "taptaptap"});
 
 function reportTapStatus(message) {
@@ -9,8 +9,15 @@ function reportTapStatus(message) {
 			       });
 }
 
-if(data.startsWith("TAP")) {
+if(data != null && data.startsWith("TAP")) {
     reportTapStatus("TAP_START");
 } else {
     reportTapStatus("TAP_END");
 }
+
+$div = $("body").append("<div></div>");
+$div.css({"font-family" : "monospace"});
+for(let line of data.split("\n")) {
+    $div.append(line+"</br>");
+}
+
