@@ -11,6 +11,7 @@ function spanWithClass(contents, spanClass) {
 }
 
 $(document).ready(function() {
+    // Chrome renders text documents inside a faked up <pre> node
     var preNode = $("pre")[0];
     
     chrome.runtime.onMessage.addListener(
@@ -30,8 +31,6 @@ $(document).ready(function() {
 	    }
 	});
     
-    // Chrome renders text documents inside a faked up <pre> node
-    var preNode = $("pre")[0];
     var data = preNode.innerHTML;
 
     if(data != null && data.startsWith("TAP")) {
