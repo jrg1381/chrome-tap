@@ -45,7 +45,7 @@ $(document).ready(function() {
 
     $div = $("<div id=\"chrome-tap-parsed-output\"></div>");
     $("body").append($div);
-    $div.css({"font-family" : "monospace"});
+    $div.css({"font-family" : "monospace", "white-space" : "pre-wrap"});
     for(let line of data.split("\n")) {
 	if(line.startsWith("#")) {
 	    line = spanWithClass(line, "chrome-tap-comment");
