@@ -2,15 +2,20 @@ var tapDocuments = new Set();
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // The page can send us messages if the extension loads inside it and finds TAP.
+    var response = "";
+
     if(request.msg == "TAP_START") {
 	enableUI();
 	tapDocuments.add(sender.tab.id);
+	response = "OK";
+	
     } else {
 	disableUI();
 	tapDocuments.delete(sender.tab.id);
+	response = "NOT OK";
     }
     
-    sendResponse({msg : "OK"});
+    sendResponse({msg : response});
 });
 
 chrome.tabs.onActivated.addListener(function(activeInfo) {
@@ -40,4 +45,17 @@ function disableUI() {
     chrome.browserAction.setPopup({popup : ""});
 }
 
+function changeTapView(message) {
+    chrome.tabs.query({active:true,currentWindow:true}, function(tabs) {
+	chrome.tabs.sendMessage(tabs[0].id, {msg : message}, null);
+    });
+}
+
+function showRawTap() {
+    changeTapView("TAP_SHOW_RAW");
+}
+
+function showParsedTap() {
+    changeTapView("TAP_SHOW_PARSED");
+}
 

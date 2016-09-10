@@ -11,9 +11,9 @@
     
     "content_scripts" : [
 	{
-	    "run_at" : "document_end",
+	    "css" : ["tap.css"],
 	    "js" : ["jquery-3.1.0.js", "content-script.js"],
-	    "matches": ["*://*/*.txt"]
+	    "matches": ["*://*/*.txt", "*://*/*.t"]
 	}
     ],
     
