@@ -7,7 +7,7 @@ function reportTapStatus(message) {
 }
 
 function spanWithClass(contents, spanClass) {
-    return $("<span class=\""+spanClass+"\">"+contents+"</span>");
+    return $("<span class=\""+spanClass+"\">"+contents+"</br></span>");
 }
 
 $(document).ready(function() {
@@ -26,7 +26,8 @@ $(document).ready(function() {
 		    $("#chrome-tap-parsed-output").show();
 		}
 		break;
-	    case "Foo":
+	    case "TAP_HIDE_OK":
+		$(".chrome-tap-ok").hide();
 		break;
 	    }
 	});
@@ -37,6 +38,7 @@ $(document).ready(function() {
 	reportTapStatus("TAP_START");
     } else {
 	reportTapStatus("TAP_END");
+	return;
     }
     
     $(preNode).hide();
@@ -44,6 +46,7 @@ $(document).ready(function() {
     // Replace the plain text with something formatted
 
     $div = $("<div id=\"chrome-tap-parsed-output\"></div>");
+
     $("body").append($div);
     $div.css({"font-family" : "monospace", "white-space" : "pre-wrap"});
     for(let line of data.split("\n")) {
@@ -53,8 +56,10 @@ $(document).ready(function() {
 	    line = spanWithClass(line, "chrome-tap-ok");
 	} else if(line.startsWith("not ok")) {
 	    line = spanWithClass(line, "chrome-tap-not-ok");
+	} else {
+	    line = spanWithClass(line, "chrome-tap-default");
 	}
-	$div.append(line).append("</br>");
+	$div.append(line);
     }
 });
 

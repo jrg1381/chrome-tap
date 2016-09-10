@@ -45,9 +45,17 @@ function disableUI() {
     chrome.browserAction.setPopup({popup : ""});
 }
 
-function switchView() {
+function sendMessage(message) {
     chrome.tabs.query({active:true,currentWindow:true}, function(tabs) {
-	chrome.tabs.sendMessage(tabs[0].id, {msg : "TAP_SWITCH_VIEW"}, null);
+	chrome.tabs.sendMessage(tabs[0].id, {msg : message}, null);
     });
+}
+
+function switchView() {
+    sendMessage("TAP_SWITCH_VIEW");
+}
+
+function hidePasses() {
+    sendMessage("TAP_HIDE_OK");
 }
 
