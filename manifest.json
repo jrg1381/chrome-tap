@@ -4,10 +4,15 @@
     "description" : "Parse Test Anything Protocol in a web page",
     "version" : "1.0",
 
+    "background" : {
+	"persistent" : false,
+	"scripts" : ["bg.js"]
+    },
+    
     "content_scripts" : [
 	{
-	    "js" : ["parse-tap.js"],
-	    "matches": ["https://www.redchess.net/Stats"]
+	    "js" : ["content-script.js"],
+	    "matches": ["*://*/*.txt"]
 	}
     ],
     

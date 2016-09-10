@@ -1,14 +1,9 @@
-function renderStatus(statusText) {
-    document.getElementById('parse-button').onclick = function() {
-	alert("foo");
-    };
-}
-
 document.addEventListener('DOMContentLoaded', function() {
-        document.getElementById('parse-button').onclick = function() {
-	alert("foo");
-	};
-}, function(errorMessage) {
-      renderStatus(errorMessage);
+    var button = document.getElementById('parse-button');
+    
+    button.onclick = function() { alert("Clicked"); };
+    chrome.extension.getBackgroundPage().callMethodIfTapPresent(function() {
+	alert("Foo");
+    });
 });
 
