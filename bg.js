@@ -45,17 +45,9 @@ function disableUI() {
     chrome.browserAction.setPopup({popup : ""});
 }
 
-function changeTapView(message) {
+function switchView() {
     chrome.tabs.query({active:true,currentWindow:true}, function(tabs) {
-	chrome.tabs.sendMessage(tabs[0].id, {msg : message}, null);
+	chrome.tabs.sendMessage(tabs[0].id, {msg : "TAP_SWITCH_VIEW"}, null);
     });
-}
-
-function showRawTap() {
-    changeTapView("TAP_SHOW_RAW");
-}
-
-function showParsedTap() {
-    changeTapView("TAP_SHOW_PARSED");
 }
 

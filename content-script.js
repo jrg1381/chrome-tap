@@ -16,13 +16,17 @@ $(document).ready(function() {
     chrome.runtime.onMessage.addListener(
 	function(request, sender, sendResponse) {
 	    switch(request.msg) {
-	    case "TAP_SHOW_RAW":
-		$(preNode).show();
-		$("#chrome-tap-parsed-output").hide();
+	    case "TAP_SWITCH_VIEW":
+		if($(preNode).css("display") == "none") {
+		    $(preNode).show();
+		    $("#chrome-tap-parsed-output").hide();
+		} else {
+		    $(preNode).hide();
+		    $("#chrome-tap-parsed-output").show();
+		}
 		break;
-	    case "TAP_SHOW_PARSED":
-		$(preNode).hide();
-		$("#chrome-tap-parsed-output").show();
+	    case "Foo":
+		break;
 	    }
 	});
     
