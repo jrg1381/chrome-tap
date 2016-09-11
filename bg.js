@@ -30,9 +30,9 @@ chrome.tabs.onActivated.addListener(function(activeInfo) {
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     // Assume that changing URL is not going to take us to a TAP page. If it does, then
     // TAP_START will be sent from the page, enabling the icon again.
-    //
-    // Likely this will not work if a non-active tab changes URL while we're not looking at it.
-    disableUI();
+    if(tapDocuments.has(tabId)) {
+	disableUI();
+    }
 });
 
 function enableUI() {
@@ -41,6 +41,8 @@ function enableUI() {
 }
 
 function disableUI() {
+    console.log("Disabling UI");
+    console.trace();
     chrome.browserAction.setIcon({path : "icon.png"});
     chrome.browserAction.setPopup({popup : ""});
 }
@@ -56,6 +58,6 @@ function switchView() {
 }
 
 function hidePasses() {
-    sendMessage("TAP_HIDE_OK");
+    sendMessage("TAP_SWITCH_HIDE_PASSES");
 }
 

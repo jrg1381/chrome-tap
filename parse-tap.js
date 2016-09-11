@@ -5,8 +5,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var viewButton = document.getElementById('parse-button');
     viewButton.onclick = chrome.extension.getBackgroundPage().switchView;
 
-    var hidePassedTestsButton = document.getElementById('hide-ok-button');
-    hidePassedTestsButton.onclick = chrome.extension.getBackgroundPage().hidePasses;
+    var hidePassedTestsCheckbox = document.getElementById('hide-passed-tests');
+    hidePassedTestsCheckbox.onchange = chrome.extension.getBackgroundPage().hidePasses;
 });
 
 

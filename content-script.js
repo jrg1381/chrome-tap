@@ -1,3 +1,6 @@
+var passesHidden = false;
+var showingParsedTap = true;
+
 function reportTapStatus(message) {
     console.log(message);
     chrome.runtime.sendMessage({msg : message},
@@ -18,16 +21,22 @@ $(document).ready(function() {
 	function(request, sender, sendResponse) {
 	    switch(request.msg) {
 	    case "TAP_SWITCH_VIEW":
-		if($(preNode).css("display") == "none") {
+		if(showingParsedTap) {
 		    $(preNode).show();
 		    $("#chrome-tap-parsed-output").hide();
 		} else {
 		    $(preNode).hide();
 		    $("#chrome-tap-parsed-output").show();
 		}
+		showingParsedTap = !showingParsedTap;
 		break;
-	    case "TAP_HIDE_OK":
-		$(".chrome-tap-ok").hide();
+	    case "TAP_SWITCH_HIDE_PASSES":
+		if(passesHidden) {
+		    $(".chrome-tap-ok").show();
+		} else {
+		    $(".chrome-tap-ok").hide();
+		}
+		passesHidden = !passesHidden;
 		break;
 	    }
 	});
