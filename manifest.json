@@ -13,7 +13,7 @@
 	{
 	    "css" : ["tap.css"],
 	    "js" : ["jquery-3.1.0.js", "content-script.js"],
-	    "matches": ["*://*/*.txt", "*://*/*.t"]
+	    "matches": ["*://*/*.txt", "*://*/text"]
 	}
     ],
     

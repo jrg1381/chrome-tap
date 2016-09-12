@@ -1,3 +1,9 @@
+.chrome-tap-pre {
+    word-wrap : break-word;
+    white-space : pre-wrap;
+    font-family : monospace;
+}
+
 .chrome-tap-comment {
 	color : blue;
 }
@@ -6,4 +12,8 @@
 }
 .chrome-tap-not-ok {
     color : red;
+}
+
+.chrome-tap-invisible {
+    display : none;
 }

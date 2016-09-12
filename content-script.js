@@ -1,5 +1,6 @@
 var passesHidden = false;
 var showingParsedTap = true;
+var invisibleClass = "chrome-tap-invisible";
 
 function reportTapStatus(message) {
     console.log(message);
@@ -22,19 +23,19 @@ $(document).ready(function() {
 	    switch(request.msg) {
 	    case "TAP_SWITCH_VIEW":
 		if(showingParsedTap) {
-		    $(preNode).show();
-		    $("#chrome-tap-parsed-output").hide();
+		    $(preNode).removeClass(invisibleClass);
+		    $("#chrome-tap-parsed-output").addClass(invisibleClass);
 		} else {
-		    $(preNode).hide();
-		    $("#chrome-tap-parsed-output").show();
+		    $(preNode).addClass(invisibleClass);
+		    $("#chrome-tap-parsed-output").removeClass(invisibleClass);
 		}
 		showingParsedTap = !showingParsedTap;
 		break;
 	    case "TAP_SWITCH_HIDE_PASSES":
-		if(passesHidden) {
-		    $(".chrome-tap-ok").show();
+		if(!passesHidden) {
+		    $(".chrome-tap-ok").addClass(invisibleClass);
 		} else {
-		    $(".chrome-tap-ok").hide();
+		    $(".chrome-tap-ok").removeClass(invisibleClass);
 		}
 		passesHidden = !passesHidden;
 		break;
@@ -43,27 +44,28 @@ $(document).ready(function() {
     
     var data = preNode.innerHTML;
 
-    if(data != null && data.startsWith("TAP")) {
+    if(data != null && /1\.\.\d+/.test(data)) {
 	reportTapStatus("TAP_START");
     } else {
 	reportTapStatus("TAP_END");
 	return;
     }
+
     
-    $(preNode).hide();
+    $(preNode).addClass("chrome-tap-pre chrome-tap-invisible");
 
     // Replace the plain text with something formatted
 
     $div = $("<div id=\"chrome-tap-parsed-output\"></div>");
 
     $("body").append($div);
-    $div.css({"font-family" : "monospace", "white-space" : "pre-wrap"});
+    $div.addClass("chrome-tap-pre");
     for(let line of data.split("\n")) {
-	if(line.startsWith("#")) {
+	if(/^\s*#/.test(line)) {
 	    line = spanWithClass(line, "chrome-tap-comment");
-	} else if(line.startsWith("ok")) {
+	} else if(/^\s*ok/.test(line)) {
 	    line = spanWithClass(line, "chrome-tap-ok");
-	} else if(line.startsWith("not ok")) {
+	} else if(/^\s*not ok/.test(line)) {
 	    line = spanWithClass(line, "chrome-tap-not-ok");
 	} else {
 	    line = spanWithClass(line, "chrome-tap-default");

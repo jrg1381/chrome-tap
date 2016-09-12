@@ -1,4 +1,5 @@
 var tapDocuments = new Set();
+var isPassesHidden = false;
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // The page can send us messages if the extension loads inside it and finds TAP.
@@ -59,5 +60,6 @@ function switchView() {
 
 function hidePasses() {
     sendMessage("TAP_SWITCH_HIDE_PASSES");
+    isPassesHidden = !isPassesHidden;
 }
 
