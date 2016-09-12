@@ -51,7 +51,7 @@ $(document).ready(function() {
 	return;
     }
 
-    
+    $(preNode).removeAttr('style');
     $(preNode).addClass("chrome-tap-pre chrome-tap-invisible");
 
     // Replace the plain text with something formatted
