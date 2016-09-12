@@ -6,12 +6,12 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     var response = "";
 
     if(request.msg == "TAP_START") {
-	enableUI();
+	enableUI(sender.tab.id);
 	tapDocuments.add(sender.tab.id);
 	response = "OK";
 	
     } else {
-	disableUI();
+	disableUI(sender.tab.id);
 	tapDocuments.delete(sender.tab.id);
 	response = "NOT OK";
     }
@@ -19,33 +19,24 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     sendResponse({msg : response});
 });
 
-chrome.tabs.onActivated.addListener(function(activeInfo) {
-    // When the user changes tabs, see if it's a tap we know about already.
-    if(tapDocuments.has(activeInfo.tabId)) {
-	enableUI();
-    } else {
-	disableUI();
-    }  
-});
-
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     // Assume that changing URL is not going to take us to a TAP page. If it does, then
     // TAP_START will be sent from the page, enabling the icon again.
     if(tapDocuments.has(tabId)) {
-	disableUI();
+	disableUI(tabId);
     }
 });
 
-function enableUI() {
-    chrome.browserAction.setIcon({path : "icon-live.png"});
-    chrome.browserAction.setPopup({popup : "popup.html"});
+function enableUI(tabId) {
+    chrome.browserAction.setIcon({ tabId : tabId, path : "icon-live.png" });
+    chrome.browserAction.setPopup({ tabId : tabId, popup : "popup.html" });
 }
 
-function disableUI() {
+function disableUI(tabId) {
     console.log("Disabling UI");
     console.trace();
-    chrome.browserAction.setIcon({path : "icon.png"});
-    chrome.browserAction.setPopup({popup : ""});
+    chrome.browserAction.setIcon({ tabId : tabId, path : "icon.png" });
+    chrome.browserAction.setPopup({ tabId : tabId, popup : "" });
 }
 
 function sendMessage(message) {

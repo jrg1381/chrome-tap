@@ -14,6 +14,26 @@ function spanWithClass(contents, spanClass) {
     return $("<span class=\""+spanClass+"\">"+contents+"</br></span>");
 }
 
+function tapSwitchView(preNode) {
+    if(showingParsedTap) {
+	preNode.removeClass(invisibleClass);
+	$("#chrome-tap-parsed-output").addClass(invisibleClass);
+    } else {
+	preNode.addClass(invisibleClass);
+	$("#chrome-tap-parsed-output").removeClass(invisibleClass);
+    }
+    showingParsedTap = !showingParsedTap;
+}
+
+function tapHidePasses() {
+    if(passesHidden) {
+	$(".chrome-tap-ok").removeClass(invisibleClass);
+    } else {
+	$(".chrome-tap-ok").addClass(invisibleClass);
+    }
+    passesHidden = !passesHidden;
+}
+
 $(document).ready(function() {
     // Chrome renders text documents inside a faked up <pre> node
     var preNode = $("pre")[0];
@@ -22,22 +42,10 @@ $(document).ready(function() {
 	function(request, sender, sendResponse) {
 	    switch(request.msg) {
 	    case "TAP_SWITCH_VIEW":
-		if(showingParsedTap) {
-		    $(preNode).removeClass(invisibleClass);
-		    $("#chrome-tap-parsed-output").addClass(invisibleClass);
-		} else {
-		    $(preNode).addClass(invisibleClass);
-		    $("#chrome-tap-parsed-output").removeClass(invisibleClass);
-		}
-		showingParsedTap = !showingParsedTap;
+		tapSwitchView($(preNode));
 		break;
 	    case "TAP_SWITCH_HIDE_PASSES":
-		if(!passesHidden) {
-		    $(".chrome-tap-ok").addClass(invisibleClass);
-		} else {
-		    $(".chrome-tap-ok").removeClass(invisibleClass);
-		}
-		passesHidden = !passesHidden;
+		tapHidePasses();
 		break;
 	    }
 	});
