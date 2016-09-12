@@ -1,4 +1,3 @@
-var tapDocuments = new Set();
 var isPassesHidden = false;
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
@@ -7,12 +6,10 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 
     if(request.msg == "TAP_START") {
 	enableUI(sender.tab.id);
-	tapDocuments.add(sender.tab.id);
 	response = "OK";
 	
     } else {
 	disableUI(sender.tab.id);
-	tapDocuments.delete(sender.tab.id);
 	response = "NOT OK";
     }
     
@@ -22,19 +19,17 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
     // Assume that changing URL is not going to take us to a TAP page. If it does, then
     // TAP_START will be sent from the page, enabling the icon again.
-    if(tapDocuments.has(tabId)) {
-	disableUI(tabId);
-    }
+    disableUI(tabId);
 });
 
 function enableUI(tabId) {
+    console.log("Enabling UI");
     chrome.browserAction.setIcon({ tabId : tabId, path : "icon-live.png" });
     chrome.browserAction.setPopup({ tabId : tabId, popup : "popup.html" });
 }
 
 function disableUI(tabId) {
     console.log("Disabling UI");
-    console.trace();
     chrome.browserAction.setIcon({ tabId : tabId, path : "icon.png" });
     chrome.browserAction.setPopup({ tabId : tabId, popup : "" });
 }
