@@ -1,0 +1,28 @@
+{
+  "name": "chrome-tap",
+  "version": "1.0.0",
+  "description": "Chrome extension which parses TAP data for display",
+  "main": "bg.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jrg1381/chrome-tap.git"
+  },
+  "keywords": [
+    "TAP"
+  ],
+  "author": "James Gilmore",
+  "license": "UNLICENSED",
+  "private": true,
+  "bugs": {
+    "url": "https://github.com/jrg1381/chrome-tap/issues"
+  },
+  "homepage": "https://github.com/jrg1381/chrome-tap#readme",
+  "dependencies": {
+    "browserify": "^13.1.0",
+    "jquery": "^3.1.0",
+    "tap-parser": "^3.0.3"
+  }
+}
