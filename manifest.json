@@ -3,27 +3,29 @@
     "name" : "Chrome TAP",
     "description" : "Parse Test Anything Protocol in a web page",
     "version" : "1.0",
-
+    
     "background" : {
-	"persistent" : false,
-	"scripts" : ["bg.js"]
+        "persistent" : false,
+        "scripts" : ["bg.js"]
     },
     
     "content_scripts" : [
-	{
-	    "css" : ["tap.css"],
-	    "js" : ["node_modules/jquery/dist/jquery.min.js", "content-script.js"],
-	    "matches": ["*://*/*.txt", "*://*/*text"]
-	}
+        {
+            "css" : ["tap.css"],
+            "js" : [
+                "node_modules/jquery/dist/jquery.min.js",
+                "content-script-bundle.js"],
+            "matches": ["*://*/*.txt", "*://*/*text"]
+        }
     ],
     
     "browser_action" : {
-	"default_icon" : "icon.png",
-	"default_popup" : "",
-	"default_title" : "Parse TAP data"
+        "default_icon" : "icon.png",
+        "default_popup" : "",
+        "default_title" : "Parse TAP data"
     },
     "permissions" : [
-	"activeTab",
-	"https://ajax.googleapis.com/"
+        "activeTab",
+        "https://ajax.googleapis.com/"
     ]
 }

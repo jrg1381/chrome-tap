@@ -1,3 +1,5 @@
+var dummy = require('tap-parser');
+
 var passesHidden = false;
 var showingParsedTap = true;
 var invisibleClass = "chrome-tap-invisible";
