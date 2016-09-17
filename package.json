@@ -14,7 +14,6 @@
         "LICENSE",
         "manifest.json",
         "node_modules",
-        "#package.json#",
         "package.json",
         "parse-tap.js",
         "popup.html",
