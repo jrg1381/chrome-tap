@@ -70,6 +70,7 @@ $(document).ready(function() {
 
     $("body").append($div);
     $div.addClass("chrome-tap-pre");
+    
     for(let line of data.split("\n")) {
         if(/^\s*#/.test(line)) {
             line = spanWithClass(line, "chrome-tap-comment");
@@ -84,21 +85,32 @@ $(document).ready(function() {
     }
 
     var p = new parser();
-
-    function addEventHandlers(tapParser) {
+    var d = 1;
+    
+    function addEventHandlers(tapParser, depth) {
         tapParser.on('comment', function(comment) {
+            comment.depth = depth;
             console.log(comment);
         });
+
         tapParser.on('complete', function(results) {
+            d--;
+            results.depth = depth;
             console.log(results);
+        });
+
+        tapParser.on('assert', function(assertion) {
+            assertion.depth = depth;
+            console.log(assertion);
+        });
+
+        tapParser.on('child', function(childParser) {
+            d++;
+            addEventHandlers(childParser, d);
         });
     }
     
-    p.on('child', function(childParser) {
-        addEventHandlers(childParser);
-    });
-
-    addEventHandlers(p);
+    addEventHandlers(p, 1);
 
     p.write(data);
     p.end();
