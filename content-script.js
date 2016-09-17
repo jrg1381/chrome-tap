@@ -92,5 +92,6 @@ $(document).ready(function() {
     });
 
     p.write(data);
+    p.end();
 });
 
