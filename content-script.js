@@ -83,13 +83,22 @@ $(document).ready(function() {
         $div.append(line);
     }
 
-    var p = parser(function(results) {
-        console.log(results);
-    });
+    var p = new parser();
+
+    function addEventHandlers(tapParser) {
+        tapParser.on('comment', function(comment) {
+            console.log(comment);
+        });
+        tapParser.on('complete', function(results) {
+            console.log(results);
+        });
+    }
     
-    p.on('comment', function(comment) {
-        console.log(comment);
+    p.on('child', function(childParser) {
+        addEventHandlers(childParser);
     });
+
+    addEventHandlers(p);
 
     p.write(data);
     p.end();
