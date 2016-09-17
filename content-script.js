@@ -88,20 +88,28 @@ $(document).ready(function() {
     var d = 1;
     
     function addEventHandlers(tapParser, depth) {
+        var currentAssertions = [];
+        var currentComments = [];
+        
         tapParser.on('comment', function(comment) {
-            comment.depth = depth;
-            console.log(comment);
+            //    console.log({ comment : comment, depth : depth});
+            currentComments.push(comment);
         });
 
         tapParser.on('complete', function(results) {
             d--;
             results.depth = depth;
+            results.currentComments = currentComments;
+            results.childAssertions = currentAssertions;
             console.log(results);
+            currentAssertions = [];
+            currentComments = [];
         });
 
         tapParser.on('assert', function(assertion) {
             assertion.depth = depth;
-            console.log(assertion);
+            //           console.log(assertion);
+            currentAssertions.push(assertion);
         });
 
         tapParser.on('child', function(childParser) {
