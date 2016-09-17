@@ -4,6 +4,12 @@
     font-family : monospace;
 }
 
+.chrome-tap-box {
+    border : 1px;
+    border-style : solid;
+    border-color : black;
+}
+
 .chrome-tap-comment {
 	color : blue;
 }

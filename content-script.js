@@ -36,6 +36,19 @@ function tapHidePasses() {
     passesHidden = !passesHidden;
 }
 
+function okOrNotOkClass(pass)
+{
+    return pass ? "chrome-tap-ok" : "chrome-tap-not-ok";
+}
+
+function indent(level) {
+    var result = "";
+    for(var i = 0; i < level; i++) {
+        result += "    ";
+    }
+    return result;
+}
+
 $(document).ready(function() {
     // Chrome renders text documents inside a faked up <pre> node
     var preNode = $("pre")[0];
@@ -66,10 +79,10 @@ $(document).ready(function() {
 
     // Replace the plain text with something formatted
 
-    $div = $("<div id=\"chrome-tap-parsed-output\"></div>");
+    var div = $("<div id=\"chrome-tap-parsed-output\"></div>");
 
-    $("body").append($div);
-    $div.addClass("chrome-tap-pre");
+    $("body").append(div);
+    div.addClass("chrome-tap-pre");
     
     for(let line of data.split("\n")) {
         if(/^\s*#/.test(line)) {
@@ -81,39 +94,50 @@ $(document).ready(function() {
         } else {
             line = spanWithClass(line, "chrome-tap-default");
         }
-        $div.append(line);
+        div.append(line);
     }
 
-    var p = new parser();
+    var newdiv = $("<div id=\"chrome-tap-parsed-output2\"></div>");
+    $("body").append(newdiv);
+    newdiv.addClass("chrome-tap-pre");
+
+    var currentBox = $("<div class=\"chrome-tap-box\"></div>");
+    newdiv.append(currentBox);
+    
+    var p = new parser({preserveWhitespace : true});
     var d = 1;
     
     function addEventHandlers(tapParser, depth) {
-        var currentAssertions = [];
-        var currentComments = [];
+        var boxStack = [currentBox];
+        var indentText = indent(depth);
         
         tapParser.on('comment', function(comment) {
-            //    console.log({ comment : comment, depth : depth});
-            currentComments.push(comment);
+            comment = indentText + comment.trim("\n");
+            var line = spanWithClass(comment, "chrome-tap-comment");
+            currentBox.append(line);
         });
 
         tapParser.on('complete', function(results) {
             d--;
-            results.depth = depth;
-            results.currentComments = currentComments;
-            results.childAssertions = currentAssertions;
-            console.log(results);
-            currentAssertions = [];
-            currentComments = [];
+            currentBox = boxStack.pop();
         });
 
         tapParser.on('assert', function(assertion) {
-            assertion.depth = depth;
-            //           console.log(assertion);
-            currentAssertions.push(assertion);
+            var line = spanWithClass(indentText +
+                                     [assertion.ok ? "ok" : "not ok",
+                                      assertion.id,
+                                      "-",
+                                      assertion.name].join(" "),
+                                     okOrNotOkClass(assertion.ok));
+
+            currentBox.append(line);
         });
 
         tapParser.on('child', function(childParser) {
             d++;
+            boxStack.push(currentBox);
+            currentBox = $("<div class=\"chrome-tap-box\"></div>");
+            newdiv.append(currentBox);
             addEventHandlers(childParser, d);
         });
     }
