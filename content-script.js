@@ -49,6 +49,14 @@ function indent(level) {
     return result;
 }
 
+function boxAtIndent(level) {
+    var colors = ["#b2a589","#ffb896","#fff9b1","#9ab285","#11929e"];
+    var currentBox = $("<div class=\"chrome-tap-box\"></div>");
+    currentBox.css("background-color",colors[level]);
+    currentBox.css("margin-left",level*50+"px");
+    return currentBox;
+}
+
 $(document).ready(function() {
     // Chrome renders text documents inside a faked up <pre> node
     var preNode = $("pre")[0];
@@ -101,48 +109,54 @@ $(document).ready(function() {
     $("body").append(newdiv);
     newdiv.addClass("chrome-tap-pre");
 
-    var currentBox = $("<div class=\"chrome-tap-box\"></div>");
-    newdiv.append(currentBox);
+    var d = 0;
+    var currentBox0 = boxAtIndent(d);
+    newdiv.append(currentBox0);
     
     var p = new parser({preserveWhitespace : true});
-    var d = 1;
     
     function addEventHandlers(tapParser, depth) {
-        var boxStack = [currentBox];
-        var indentText = indent(depth);
+     //   var indentText = indent(depth);
         
         tapParser.on('comment', function(comment) {
-            comment = indentText + comment.trim("\n");
+            comment = comment.trim("\n");
             var line = spanWithClass(comment, "chrome-tap-comment");
-            currentBox.append(line);
+            tapParser.currentBox.append(line);
         });
 
         tapParser.on('complete', function(results) {
             d--;
-            currentBox = boxStack.pop();
+            tapParser.currentBox = tapParser.currentBox.parent();
         });
 
+        tapParser.on('plan', function(plan) {
+            var line = spanWithClass(plan.start + ".." + plan.end,
+                                     "chrome-tap-plan");
+            tapParser.currentBox.append(line);
+//            tapParser.currentBox = currentBox.parent();
+        });
+        
         tapParser.on('assert', function(assertion) {
-            var line = spanWithClass(indentText +
-                                     [assertion.ok ? "ok" : "not ok",
+            var line = spanWithClass([assertion.ok ? "ok" : "not ok",
                                       assertion.id,
                                       "-",
                                       assertion.name].join(" "),
                                      okOrNotOkClass(assertion.ok));
 
-            currentBox.append(line);
+            tapParser.currentBox.append(line);
         });
 
         tapParser.on('child', function(childParser) {
             d++;
-            boxStack.push(currentBox);
-            currentBox = $("<div class=\"chrome-tap-box\"></div>");
-            newdiv.append(currentBox);
+            newBox = boxAtIndent(d);
+            tapParser.currentBox.append(newBox);
+            childParser.currentBox = newBox;
             addEventHandlers(childParser, d);
         });
     }
-    
-    addEventHandlers(p, 1);
+
+    p.currentBox = currentBox0;
+    addEventHandlers(p, 0);
 
     p.write(data);
     p.end();

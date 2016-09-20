@@ -13,9 +13,15 @@
 .chrome-tap-comment {
 	color : blue;
 }
+
 .chrome-tap-ok {
     color : green;
 }
+
+.chrome-tap-plan {
+    color : purple;
+}
+
 .chrome-tap-not-ok {
     color : red;
 }
