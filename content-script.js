@@ -28,25 +28,24 @@ function tapSwitchView(preNode) {
 }
 
 function tapHidePasses() {
+    var parsedOutput = $("div#chrome-tap-parsed-output-boxed");
+    
     if(passesHidden) {
-        $(".chrome-tap-ok").removeClass(invisibleClass);
+//        $(".chrome-tap-ok").removeClass(invisibleClass);
+        parsedOutput.find("div:not(.chrome-tap-failed)")
+            .removeClass(invisibleClass);
     } else {
-        $(".chrome-tap-ok").addClass(invisibleClass);
+//        $(".chrome-tap-ok").addClass(invisibleClass);
+        parsedOutput.find("div:not(.chrome-tap-failed)")
+            .addClass(invisibleClass);
     }
+    
     passesHidden = !passesHidden;
 }
 
 function okOrNotOkClass(pass)
 {
     return pass ? "chrome-tap-ok" : "chrome-tap-not-ok";
-}
-
-function indent(level) {
-    var result = "";
-    for(var i = 0; i < level; i++) {
-        result += "    ";
-    }
-    return result;
 }
 
 function boxAtIndent(level) {
@@ -87,10 +86,10 @@ $(document).ready(function() {
 
     // Replace the plain text with something formatted
 
-    var div = $("<div id=\"chrome-tap-parsed-output\"></div>");
+    var simpleDiv = $("<div id=\"chrome-tap-parsed-output\"></div>");
 
-    $("body").append(div);
-    div.addClass("chrome-tap-pre");
+    $("body").append(simpleDiv);
+    simpleDiv.addClass("chrome-tap-pre");
     
     for(let line of data.split("\n")) {
         if(/^\s*#/.test(line)) {
@@ -102,10 +101,10 @@ $(document).ready(function() {
         } else {
             line = spanWithClass(line, "chrome-tap-default");
         }
-        div.append(line);
+        simpleDiv.append(line);
     }
 
-    var newdiv = $("<div id=\"chrome-tap-parsed-output2\"></div>");
+    var newdiv = $("<div id=\"chrome-tap-parsed-output-boxed\"></div>");
     $("body").append(newdiv);
     newdiv.addClass("chrome-tap-pre");
 
@@ -115,9 +114,7 @@ $(document).ready(function() {
     
     var p = new parser({preserveWhitespace : true});
     
-    function addEventHandlers(tapParser, depth) {
-     //   var indentText = indent(depth);
-        
+    function addEventHandlers(tapParser, depth) {      
         tapParser.on('comment', function(comment) {
             comment = comment.trim("\n");
             var line = spanWithClass(comment, "chrome-tap-comment");
@@ -126,7 +123,16 @@ $(document).ready(function() {
 
         tapParser.on('complete', function(results) {
             d--;
-            tapParser.currentBox = tapParser.currentBox.parent();
+            var current = tapParser.currentBox;
+            var parent = tapParser.currentBox.parent();
+            
+            if(current.hasClass("chrome-tap-failed") &&
+               !parent.hasClass("chrome-tap-failed"))
+            {
+                parent.addClass("chrome-tap-failed");
+            }
+            
+            tapParser.currentBox = parent;
         });
 
         tapParser.on('plan', function(plan) {
@@ -143,6 +149,10 @@ $(document).ready(function() {
                                       assertion.name].join(" "),
                                      okOrNotOkClass(assertion.ok));
 
+            if(!assertion.ok) {
+                tapParser.currentBox.addClass("chrome-tap-failed");
+            }
+            
             tapParser.currentBox.append(line);
         });
 

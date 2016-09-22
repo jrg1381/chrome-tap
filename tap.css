@@ -14,6 +14,10 @@
 	color : blue;
 }
 
+.chrome-tap-failed {
+    border-style : dotted;
+}
+
 .chrome-tap-ok {
     color : green;
 }
