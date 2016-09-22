@@ -49,7 +49,7 @@ function okOrNotOkClass(pass)
 }
 
 function boxAtIndent(level) {
-    var colors = ["#b2a589","#ffb896","#fff9b1","#9ab285","#11929e"];
+    var colors = ["#b2a589","#96b8ff","#fff9b1","#9ab285","#11929e"];
     var currentBox = $("<div class=\"chrome-tap-box\"></div>");
     currentBox.css("background-color",colors[level]);
     currentBox.css("margin-left",level*50+"px");
@@ -85,7 +85,7 @@ $(document).ready(function() {
     $(preNode).addClass("chrome-tap-pre chrome-tap-invisible");
 
     // Replace the plain text with something formatted
-
+/*
     var simpleDiv = $("<div id=\"chrome-tap-parsed-output\"></div>");
 
     $("body").append(simpleDiv);
@@ -103,7 +103,7 @@ $(document).ready(function() {
         }
         simpleDiv.append(line);
     }
-
+*/
     var newdiv = $("<div id=\"chrome-tap-parsed-output-boxed\"></div>");
     $("body").append(newdiv);
     newdiv.addClass("chrome-tap-pre");
@@ -150,7 +150,7 @@ $(document).ready(function() {
                                      okOrNotOkClass(assertion.ok));
 
             if(!assertion.ok) {
-                tapParser.currentBox.addClass("chrome-tap-failed");
+                tapParser.currentBox.addClass("chrome-tap-failed chrome-tap-failed-self");
             }
             
             tapParser.currentBox.append(line);

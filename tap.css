@@ -4,19 +4,25 @@
     font-family : monospace;
 }
 
+/*
 .chrome-tap-box {
     border : 1px;
     border-style : solid;
     border-color : black;
 }
+*/
 
 .chrome-tap-comment {
 	color : blue;
 }
 
-.chrome-tap-failed {
-    border-style : dotted;
+ .chrome-tap-failed-self {
+     border-left : 5px;
+     border-left-style : solid;
+     padding-left : 5px;
+     border-color : red;
 }
+
 
 .chrome-tap-ok {
     color : green;
