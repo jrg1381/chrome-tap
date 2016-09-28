@@ -16,14 +16,6 @@
 	color : blue;
 }
 
- .chrome-tap-failed-self {
-     border-left : 5px;
-     border-left-style : solid;
-     padding-left : 5px;
-     border-color : red;
-}
-
-
 .chrome-tap-ok {
     color : green;
 }

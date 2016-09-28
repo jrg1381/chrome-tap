@@ -44,6 +44,14 @@ function sendMessage(message) {
     });
 }
 
+function previousFailure() {
+    sendMessage("TAP_PREVIOUS_FAILURE");
+}
+
+function nextFailure() {
+    sendMessage("TAP_NEXT_FAILURE");
+}
+
 function switchView() {
     sendMessage("TAP_SWITCH_VIEW");
 }

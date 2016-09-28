@@ -1,16 +1,23 @@
 var SHOW_PARSED = "Show parsed TAP";
 var SHOW_RAW = "Show raw TAP";
+var backgroundPage;
 
 document.addEventListener('DOMContentLoaded', function() {
-    var backgroundPage = chrome.extension.getBackgroundPage();
+    backgroundPage = chrome.extension.getBackgroundPage();
     
     var viewButton = document.getElementById('parse-button');
     viewButton.onclick = backgroundPage.switchView;
 
-    var hidePassedTestsCheckbox = document.getElementById('hide-passed-tests');
+    var previousButton = document.getElementById('previous');
+    previousButton.onclick = backgroundPage.previousFailure;
+    
+    var nextButton = document.getElementById('next');
+    nextButton.onclick = backgroundPage.nextFailure;
+    
+//    var hidePassedTestsCheckbox = document.getElementById('hide-passed-tests');
 
-    hidePassedTestsCheckbox.checked = backgroundPage.isPassesHidden;
-    hidePassedTestsCheckbox.onchange = backgroundPage.hidePasses;
+//    hidePassedTestsCheckbox.checked = backgroundPage.isPassesHidden;
+//    hidePassedTestsCheckbox.onchange = backgroundPage.hidePasses;
 });
 
 
