@@ -1,7 +1,28 @@
+var DirectoryTree = function() {
+    var self = this;
+    this.root = {};
+    
+    DirectoryTree.prototype.addToNode = function(pathElement, node) {
+        if(!node.hasOwnProperty(pathElement)) {
+            node[pathElement] = {};
+        }
+        return node[pathElement];
+    }
+    
+    DirectoryTree.prototype.add = function(path) {
+        var pathElements = path.split('/');
+        var currentNode = self.root;
+        
+        pathElements.forEach(function(element, index, array) {
+            currentNode = self.addToNode(element, currentNode);
+        });
+    }
+}
+
 var App = {};
 
 App.parser = require('tap-parser');
-
+App.directoryTree = new DirectoryTree();
 App.passesHidden = false;
 App.showingParsedTap = true;
 App.invisibleClass = "chrome-tap-invisible";
@@ -74,6 +95,8 @@ var currentDepth = 0;
 function pathToScpUrlLink(path, cssClass) {
     var matches = path.match("(?: |^)(/scratch/buildbot/slave-(.*?)(?:/[^/]+/)+[^ ]+)(?: |$)");
     if(matches != null && matches.length > 0) {
+        App.directoryTree.add(matches[1]);
+        
         return path.replace(matches[1],
                             "<a class=\""
                             + cssClass
