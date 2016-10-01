@@ -13,6 +13,11 @@ document.addEventListener('DOMContentLoaded', function() {
     
     var nextButton = document.getElementById('next');
     nextButton.onclick = backgroundPage.nextFailure;
+
+    var optionsButton = document.getElementById('options');
+    optionsButton.onclick = function() {
+        chrome.runtime.openOptionsPage();
+    };
     
 //    var hidePassedTestsCheckbox = document.getElementById('hide-passed-tests');
 

@@ -1,14 +1,19 @@
-var parser = require('tap-parser');
+var App = {};
 
-var passesHidden = false;
-var showingParsedTap = true;
-var invisibleClass = "chrome-tap-invisible";
+App.parser = require('tap-parser');
 
-function reportTapStatus(message) {
+App.passesHidden = false;
+App.showingParsedTap = true;
+App.invisibleClass = "chrome-tap-invisible";
+App.username = "foo";
+
+function reportTapStatus(message, processDocumentCallback) {
     console.log(message);
     chrome.runtime.sendMessage({msg : message},
                                function(response) {
-                                   console.log(response.msg);
+                                   console.log(response);
+                                   App.username = response.config.username;
+                                   processDocumentCallback();
                                });
 }
 
@@ -17,14 +22,14 @@ function spanWithClass(contents, spanClass) {
 }
 
 function tapSwitchView(preNode) {
-    if(showingParsedTap) {
+    if(App.showingParsedTap) {
         preNode.removeClass(invisibleClass);
         $("#chrome-tap-parsed-output").addClass(invisibleClass);
     } else {
         preNode.addClass(invisibleClass);
         $("#chrome-tap-parsed-output").removeClass(invisibleClass);
     }
-    showingParsedTap = !showingParsedTap;
+    App.showingParsedTap = !App.showingParsedTap;
 }
 
 function tapNextFailure() {
@@ -38,17 +43,17 @@ function tapPreviousFailure() {
 function tapHidePasses() {
     var parsedOutput = $("div#chrome-tap-parsed-output-boxed");
     
-    if(passesHidden) {
-//        $(".chrome-tap-ok").removeClass(invisibleClass);
+    if(App.passesHidden) {
+//        $(".chrome-tap-ok").removeClass(App.invisibleClass);
         parsedOutput.find("div:not(.chrome-tap-failed)")
-            .removeClass(invisibleClass);
+            .removeClass(App.invisibleClass);
     } else {
-//        $(".chrome-tap-ok").addClass(invisibleClass);
+//        $(".chrome-tap-ok").addClass(App.invisibleClass);
         parsedOutput.find("div:not(.chrome-tap-failed)")
-            .addClass(invisibleClass);
+            .addClass(App.invisibleClass);
     }
     
-    passesHidden = !passesHidden;
+    App.passesHidden = !App.passesHidden;
 }
 
 function okOrNotOkClass(pass)
@@ -62,6 +67,87 @@ function boxAtIndent(level) {
  //   currentBox.css("background-color",colors[level]);
     currentBox.css("margin-left",level*25+"px");
     return currentBox;
+}
+
+var currentDepth = 0;
+
+function pathToScpUrlLink(path, cssClass) {
+    var matches = path.match("(?: |^)(/scratch/buildbot/slave-(.*?)(?:/[^/]+/)+[^ ]+)(?: |$)");
+    if(matches != null && matches.length > 0) {
+        return path.replace(matches[1],
+                            "<a class=\""
+                            + cssClass
+                            + "\" href=\"scp://"
+                            + App.username
+                            + "@"
+                            + matches[2]
+                            + matches[1]
+                            + "\">"
+                            + matches[1]
+                            + "</a>");
+    }
+    return path;
+}
+
+function addEventHandlers(tapParser) {      
+    tapParser.on('comment', function(comment) {
+        comment = comment.trim("\n");
+        var line = spanWithClass(pathToScpUrlLink(comment, "chrome-tap-comment"),
+                                 "chrome-tap-comment");
+        tapParser.currentBox.append(line);
+    });
+    
+    tapParser.on('complete', function(results) {
+        currentDepth--;
+        var current = tapParser.currentBox;
+        var parent = tapParser.currentBox.parent();
+        
+        if(current.hasClass("chrome-tap-failed") &&
+           !parent.hasClass("chrome-tap-failed"))
+        {
+            parent.addClass("chrome-tap-failed");
+        }
+        
+        tapParser.currentBox = parent;
+    });
+    
+    tapParser.on('plan', function(plan) {
+        var line = spanWithClass(plan.start + ".." + plan.end,
+                                 "chrome-tap-plan");
+        tapParser.currentBox.append(line);
+    });
+    
+    tapParser.on('assert', function(assertion) {
+        var assertionName = "";
+        
+        if(typeof assertion.name != 'undefined') {
+            assertionName = pathToScpUrlLink(assertion.name, okOrNotOkClass(assertion.ok));
+        } 
+        else {
+            console.log(assertion);
+            assertionName = "(undefined assertion name - tap parsing error?)";
+        }
+        
+        var line = spanWithClass([assertion.ok ? "ok" : "not ok",
+                                  assertion.id,
+                                  "-",
+                                  assertionName].join(" "),
+                                 okOrNotOkClass(assertion.ok));
+        
+        if(!assertion.ok) {
+            tapParser.currentBox.addClass("chrome-tap-failed");
+        }
+        
+        tapParser.currentBox.append(line);
+    });
+    
+    tapParser.on('child', function(childParser) {
+        currentDepth++;
+        newBox = boxAtIndent(currentDepth);
+        tapParser.currentBox.append(newBox);
+        childParser.currentBox = newBox;
+        addEventHandlers(childParser);
+    });
 }
 
 $(document).ready(function() {
@@ -85,83 +171,35 @@ $(document).ready(function() {
                 break;
             }
         });
-    
+        
     var data = preNode.innerHTML;
 
+    function processDocument() {
+        $(preNode).removeAttr('style');
+        $(preNode).addClass("chrome-tap-pre chrome-tap-invisible");
+        
+        var newdiv = $("<div id=\"chrome-tap-parsed-output-boxed\"></div>");
+        $("body").append(newdiv);
+        newdiv.addClass("chrome-tap-pre");
+        
+        var currentBox = boxAtIndent(0);
+        newdiv.append(currentBox);
+        
+        var p = new App.parser({preserveWhitespace : true});
+        
+        p.currentBox = currentBox;
+        addEventHandlers(p);
+        
+        p.write(data);
+        p.end();   
+    }
+        
+    // Look for a TAP plan (1..N) as evidence that this is TAP data
     if(data != null && /1\.\.\d+/.test(data)) {
-        reportTapStatus("TAP_START");
+        reportTapStatus("TAP_START", processDocument);
     } else {
-        reportTapStatus("TAP_END");
+        reportTapStatus("TAP_END", function() {});
         return;
     }
-
-    $(preNode).removeAttr('style');
-    $(preNode).addClass("chrome-tap-pre chrome-tap-invisible");
-
-    var newdiv = $("<div id=\"chrome-tap-parsed-output-boxed\"></div>");
-    $("body").append(newdiv);
-    newdiv.addClass("chrome-tap-pre");
-
-    var d = 0;
-    var currentBox0 = boxAtIndent(d);
-    newdiv.append(currentBox0);
-    
-    var p = new parser({preserveWhitespace : true});
-    
-    function addEventHandlers(tapParser, depth) {      
-        tapParser.on('comment', function(comment) {
-            comment = comment.trim("\n");
-            var line = spanWithClass(comment, "chrome-tap-comment");
-            tapParser.currentBox.append(line);
-        });
-
-        tapParser.on('complete', function(results) {
-            d--;
-            var current = tapParser.currentBox;
-            var parent = tapParser.currentBox.parent();
-            
-            if(current.hasClass("chrome-tap-failed") &&
-               !parent.hasClass("chrome-tap-failed"))
-            {
-                parent.addClass("chrome-tap-failed");
-            }
-            
-            tapParser.currentBox = parent;
-        });
-
-        tapParser.on('plan', function(plan) {
-            var line = spanWithClass(plan.start + ".." + plan.end,
-                                     "chrome-tap-plan");
-            tapParser.currentBox.append(line);
-        });
-        
-        tapParser.on('assert', function(assertion) {
-            var line = spanWithClass([assertion.ok ? "ok" : "not ok",
-                                      assertion.id,
-                                      "-",
-                                      assertion.name].join(" "),
-                                     okOrNotOkClass(assertion.ok));
-
-            if(!assertion.ok) {
-                tapParser.currentBox.addClass("chrome-tap-failed");
-            }
-            
-            tapParser.currentBox.append(line);
-        });
-
-        tapParser.on('child', function(childParser) {
-            d++;
-            newBox = boxAtIndent(d);
-            tapParser.currentBox.append(newBox);
-            childParser.currentBox = newBox;
-            addEventHandlers(childParser, d);
-        });
-    }
-
-    p.currentBox = currentBox0;
-    addEventHandlers(p, 0);
-
-    p.write(data);
-    p.end();
 });
 

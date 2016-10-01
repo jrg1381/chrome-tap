@@ -3,6 +3,11 @@
     "name" : "Chrome TAP",
     "description" : "Parse Test Anything Protocol in a web page",
     "version" : "1.0",
+
+    "options_ui" : {
+        "page" : "options.html",
+        "chrome_style" : true
+    },
     
     "background" : {
         "persistent" : false,
@@ -26,6 +31,7 @@
     },
     "permissions" : [
         "activeTab",
+	"storage",
         "https://ajax.googleapis.com/"
     ]
 }
