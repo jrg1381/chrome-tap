@@ -44,11 +44,11 @@ function spanWithClass(contents, spanClass) {
 
 function tapSwitchView(preNode) {
     if(App.showingParsedTap) {
-        preNode.removeClass(invisibleClass);
-        $("#chrome-tap-parsed-output").addClass(invisibleClass);
+        preNode.removeClass(App.invisibleClass);
+        $("#chrome-tap-parsed-output").addClass(App.invisibleClass);
     } else {
-        preNode.addClass(invisibleClass);
-        $("#chrome-tap-parsed-output").removeClass(invisibleClass);
+        preNode.addClass(App.invisibleClass);
+        $("#chrome-tap-parsed-output").removeClass(App.invisibleClass);
     }
     App.showingParsedTap = !App.showingParsedTap;
 }
