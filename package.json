@@ -11,6 +11,7 @@
     "content-script.js",
     "icon-live.png",
     "icon.png",
+    "options.html",
     "LICENSE",
     "manifest.json",
     "node_modules",

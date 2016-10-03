@@ -12,8 +12,15 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	disableUI(sender.tab.id);
 	response = "NOT OK";
     }
-    
-    sendResponse({msg : response});
+
+    var answer = {msg : response};
+
+    chrome.storage.sync.get("username", function(items) {
+        answer.config = { username : items.username };
+        sendResponse(answer);
+    })
+
+    return true;
 });
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
@@ -34,14 +41,22 @@ function disableUI(tabId) {
     chrome.browserAction.setPopup({ tabId : tabId, popup : "" });
 }
 
-function sendMessage(message) {
+function sendMessage(message, data) {
     chrome.tabs.query({active:true,currentWindow:true}, function(tabs) {
 	if(tabs.length > 0) {
-	    chrome.tabs.sendMessage(tabs[0].id, {msg : message}, null);
+	    chrome.tabs.sendMessage(tabs[0].id, {msg : message, data : data}, null);
 	} else {
 	    console.log("No active tabs, not sending " + message);
 	}
     });
+}
+
+function previousFailure() {
+    sendMessage("TAP_PREVIOUS_FAILURE");
+}
+
+function nextFailure() {
+    sendMessage("TAP_NEXT_FAILURE");
 }
 
 function switchView() {

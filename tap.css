@@ -4,18 +4,30 @@
     font-family : monospace;
 }
 
+/*
 .chrome-tap-box {
     border : 1px;
     border-style : solid;
     border-color : black;
 }
+*/
+
+.chrome-tap-extra-line {
+    color : midnightblue;
+}
 
 .chrome-tap-comment {
 	color : blue;
 }
+
 .chrome-tap-ok {
     color : green;
 }
+
+.chrome-tap-plan {
+    color : purple;
+}
+
 .chrome-tap-not-ok {
     color : red;
 }
