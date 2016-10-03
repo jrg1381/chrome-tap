@@ -27,6 +27,7 @@ App.passesHidden = false;
 App.showingParsedTap = true;
 App.invisibleClass = "chrome-tap-invisible";
 App.username = "foo";
+App.scpRegex = new RegExp("(?: |^)(/scratch/buildbot/slave-(.*?)(?:/[^/]+/)+[^ ]+)(?: |$)","g");
 
 function reportTapStatus(message, processDocumentCallback) {
     console.log(message);
@@ -83,31 +84,43 @@ function okOrNotOkClass(pass)
 }
 
 function boxAtIndent(level) {
-  //  var colors = ["#b2a589","#96b8ff","#fff9b1","#9ab285","#11929e"];
     var currentBox = $("<div class=\"chrome-tap-box\"></div>");
- //   currentBox.css("background-color",colors[level]);
     currentBox.css("margin-left",level*25+"px");
     return currentBox;
 }
 
 var currentDepth = 0;
 
+function getMatches(input, regex, index) {
+    index || (index = 1); // first capturing group
+    var matches = [];
+    var match;
+    while(match = regex.exec(input)) {
+        matches.push(match[index]);
+    }
+    return matches;
+}  
+    
 function pathToScpUrlLink(path, cssClass) {
-    var matches = path.match("(?: |^)(/scratch/buildbot/slave-(.*?)(?:/[^/]+/)+[^ ]+)(?: |$)");
-    if(matches != null && matches.length > 0) {
-        App.directoryTree.add(matches[1]);
+    var paths = getMatches(path, App.scpRegex, 1);
+    var hostnames = getMatches(path, App.scpRegex, 2);
+    
+    for(var i=0;i<path.length;i++) {
+        App.directoryTree.add(path[i]);
         
-        return path.replace(matches[1],
+        path = path.replace(paths[i],
                             "<a class=\""
                             + cssClass
                             + "\" href=\"scp://"
                             + App.username
                             + "@"
-                            + matches[2]
-                            + matches[1]
+                            + hostnames[i]
+                            + paths[i]
                             + "\">"
-                            + matches[1]
+                            + paths[i]
                             + "</a>");
+
+        matches = regex.exec(path);
     }
     return path;
 }
@@ -117,6 +130,13 @@ function addEventHandlers(tapParser) {
         comment = comment.trim("\n");
         var line = spanWithClass(pathToScpUrlLink(comment, "chrome-tap-comment"),
                                  "chrome-tap-comment");
+        tapParser.currentBox.append(line);
+    });
+
+    tapParser.on('extra', function(extraLine) {
+        extraLine = extraLine.trim("\n");
+        var line = spanWithClass(pathToScpUrlLink(extraLine, "chrome-tap-extra-line"),
+                                 "chrome-tap-extra-line");
         tapParser.currentBox.append(line);
     });
     
