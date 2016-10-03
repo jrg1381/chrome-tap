@@ -27,7 +27,7 @@ App.passesHidden = false;
 App.showingParsedTap = true;
 App.invisibleClass = "chrome-tap-invisible";
 App.username = "foo";
-App.scpRegex = new RegExp("(?: |^)(/scratch/buildbot/slave-(.*?)(?:/[^/]+/)+[^ ]+)(?: |$)","g");
+App.scpRegex = new RegExp("(?: |^)(/(?:scratch|export)/buildbot/slave-(.*?)(?:/[^/]+/)+[^ ]+)(?: |$)","g");
 
 function reportTapStatus(message, processDocumentCallback) {
     console.log(message);
@@ -105,8 +105,8 @@ function pathToScpUrlLink(path, cssClass) {
     var paths = getMatches(path, App.scpRegex, 1);
     var hostnames = getMatches(path, App.scpRegex, 2);
     
-    for(var i=0;i<path.length;i++) {
-        App.directoryTree.add(path[i]);
+    for(var i=0;i<paths.length;i++) {
+        App.directoryTree.add(paths[i]);
         
         path = path.replace(paths[i],
                             "<a class=\""
