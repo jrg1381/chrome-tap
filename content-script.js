@@ -119,9 +119,8 @@ function pathToScpUrlLink(path, cssClass) {
                             + "\">"
                             + paths[i]
                             + "</a>");
-
-        matches = regex.exec(path);
     }
+    
     return path;
 }
 
