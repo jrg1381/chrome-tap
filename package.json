@@ -8,6 +8,7 @@
   },
   "files": [
     "bg.js",
+    "directoryTree.js",
     "content-script.js",
     "icon-live.png",
     "icon.png",

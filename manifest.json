@@ -25,6 +25,7 @@
             "css" : ["tap.css"],
             "js" : [
                 "node_modules/jquery/dist/jquery.min.js",
+                "directoryTree.js",
                 "content-script-bundle.js"],
             "matches": ["*://*/*.txt", "*://*/*text"]
         }
