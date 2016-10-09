@@ -1,21 +1,55 @@
 var DirectoryTree = function() {
     var self = this;
     this.root = {};
-    
+    this.host = "(unset)";
+    this.hostRegexp = new RegExp("slave-(.+)");
+
+    // Add pathElement as a child of node, unless such a child already exists.
     DirectoryTree.prototype.addToNode = function(pathElement, node) {
         if(!node.hasOwnProperty(pathElement)) {
             node[pathElement] = {};
         }
         return node[pathElement];
     }
-    
+
+    // Given a path that looks like foo/bar/baz, add the elements to the directory tree
+    // such that if foo/bar has already been seen, it will not be added again. The intent
+    // is to take a set of file paths and recreate the directory structure from them.
     DirectoryTree.prototype.add = function(path) {
         var pathElements = path.split('/');
         var currentNode = self.root;
         
         pathElements.forEach(function(element, index, array) {
+            var matches = element.match(self.hostRegexp);
+            if(matches != null && matches.length > 0) {
+                self.host = matches[1];
+            }
             currentNode = self.addToNode(element, currentNode);
         });
+    }
+
+    DirectoryTree.prototype.depthFirstTraversal = function(node, currentStack, leafNodeVisitor) {
+        var leafNode = true;
+        
+        for(var child in node) {
+            leafNode = false;
+            currentStack.push(child);
+            self.depthFirstTraversal(node[child], currentStack, leafNodeVisitor);
+        }
+
+        if(leafNode) {
+            leafNodeVisitor(currentStack);
+        }
+        
+        currentStack.pop();
+    }
+    
+    DirectoryTree.prototype.getPaths = function() {
+        var paths = [];
+        self.depthFirstTraversal(self.root, [], function(pathStack) {
+            paths.push(pathStack.slice());
+        });
+        console.log(paths);
     }
 }
 
@@ -23,11 +57,12 @@ var App = {};
 
 App.parser = require('tap-parser');
 App.directoryTree = new DirectoryTree();
-App.passesHidden = false;
 App.showingParsedTap = true;
 App.invisibleClass = "chrome-tap-invisible";
-App.username = "foo";
+App.username = "(unset)";
+App.scpPaths = {};
 App.scpRegex = new RegExp("(?: |^)(/(?:scratch|export)/buildbot/slave-(.*?)(?:/[^/]+/)+[^ ]+)(?: |$)","g");
+App.finalResult = true; // assume pass
 
 function reportTapStatus(message, processDocumentCallback) {
     console.log(message);
@@ -40,7 +75,9 @@ function reportTapStatus(message, processDocumentCallback) {
 }
 
 function spanWithClass(contents, spanClass) {
-    return $("<span class=\""+spanClass+"\">"+contents+"</br></span>");
+    var span = $("<span class=\""+spanClass+"\"></span>");
+    span.text(contents);
+    return span;
 }
 
 function tapSwitchView(preNode) {
@@ -54,28 +91,17 @@ function tapSwitchView(preNode) {
     App.showingParsedTap = !App.showingParsedTap;
 }
 
-function tapNextFailure() {
+App.nextFailure = function tapNextFailure() {
     window.find("not ok", true, false, true, false, false, false);
 }
 
-function tapPreviousFailure() {
+App.previousFailure = function tapPreviousFailure() {
     window.find("not ok", true, true, true, false, false, false);
 }
 
-function tapHidePasses() {
-    var parsedOutput = $("div#chrome-tap-parsed-output-boxed");
-    
-    if(App.passesHidden) {
-//        $(".chrome-tap-ok").removeClass(App.invisibleClass);
-        parsedOutput.find("div:not(.chrome-tap-failed)")
-            .removeClass(App.invisibleClass);
-    } else {
-//        $(".chrome-tap-ok").addClass(App.invisibleClass);
-        parsedOutput.find("div:not(.chrome-tap-failed)")
-            .addClass(App.invisibleClass);
-    }
-    
-    App.passesHidden = !App.passesHidden;
+App.shellPrompt = function shellPrompt() {
+    alert(JSON.stringify(App.directoryTree));
+    App.directoryTree.getPaths();
 }
 
 function okOrNotOkClass(pass)
@@ -100,43 +126,53 @@ function getMatches(input, regex, index) {
     }
     return matches;
 }  
-    
-function pathToScpUrlLink(path, cssClass) {
-    var paths = getMatches(path, App.scpRegex, 1);
-    var hostnames = getMatches(path, App.scpRegex, 2);
-    
-    for(var i=0;i<paths.length;i++) {
-        App.directoryTree.add(paths[i]);
+
+{
+    var counter = 0;
+    function pathToScpUrlLink(path, parentDOMItem) {
+        var result = {};
+        // This goes through twice, inefficient
+        var paths = getMatches(path, App.scpRegex, 1);
+        var hostnames = getMatches(path, App.scpRegex, 2);
+        var innerText = parentDOMItem.text();
         
-        path = path.replace(paths[i],
-                            "<a class=\""
-                            + cssClass
-                            + "\" href=\"scp://"
-                            + App.username
-                            + "@"
-                            + hostnames[i]
-                            + paths[i]
-                            + "\">"
-                            + paths[i]
-                            + "</a>");
+        for(var i=0;i<paths.length;i++) {
+            App.directoryTree.add(paths[i]);
+            
+            var url = "scp://"
+                + App.username
+                + "@"
+                + hostnames[i]
+                + paths[i];
+
+            // Chop off the filename (but this is wrong if the path actually is a directory...)
+            url = url.substring(0, url.lastIndexOf("/")+1);
+
+            var id = "ct-link-" + (counter++);
+            var link = "<span class=\"chrome-tap-scp\" id=\"" + id + "\">&#x21af;</span>";
+            innerText = innerText.replace(paths[i],link + paths[i]);
+            App.scpPaths[id] = url;
+        }
+
+        parentDOMItem.html(innerText);
     }
-    
-    return path;
 }
 
 function addEventHandlers(tapParser) {      
     tapParser.on('comment', function(comment) {
         comment = comment.trim("\n");
-        var line = spanWithClass(pathToScpUrlLink(comment, "chrome-tap-comment"),
-                                 "chrome-tap-comment");
+        var line = spanWithClass(comment, "chrome-tap-comment");
+        pathToScpUrlLink(comment, line);
         tapParser.currentBox.append(line);
+        tapParser.currentBox.append($("<br>"));
     });
 
     tapParser.on('extra', function(extraLine) {
         extraLine = extraLine.trim("\n");
-        var line = spanWithClass(pathToScpUrlLink(extraLine, "chrome-tap-extra-line"),
-                                 "chrome-tap-extra-line");
+        var line = spanWithClass(extraLine, "chrome-tap-extra-line");
+        pathToScpUrlLink(extraLine, line);
         tapParser.currentBox.append(line);
+        tapParser.currentBox.append($("<br>"));
     });
     
     tapParser.on('complete', function(results) {
@@ -151,25 +187,33 @@ function addEventHandlers(tapParser) {
         }
         
         tapParser.currentBox = parent;
+        if(currentDepth == 0) {
+            if(App.finalResult && results.ok) {
+                $("#chrome-tap-pie").css("background-color","green");
+            } else {
+                App.finalResult = false;
+                $("#chrome-tap-pie").css("background-color","red");
+            }
+        }
     });
     
     tapParser.on('plan', function(plan) {
         var line = spanWithClass(plan.start + ".." + plan.end,
                                  "chrome-tap-plan");
         tapParser.currentBox.append(line);
+        tapParser.currentBox.append($("<br>"));
     });
     
     tapParser.on('assert', function(assertion) {
         var assertionName = "";
         
-        if(typeof assertion.name != 'undefined') {
-            assertionName = pathToScpUrlLink(assertion.name, okOrNotOkClass(assertion.ok));
-        } 
-        else {
+        if(typeof assertion.name == 'undefined') {
             console.log(assertion);
             assertionName = "(undefined assertion name - tap parsing error?)";
+        } else {
+            assertionName = assertion.name;
         }
-        
+                
         var line = spanWithClass([assertion.ok ? "ok" : "not ok",
                                   assertion.id,
                                   "-",
@@ -179,8 +223,10 @@ function addEventHandlers(tapParser) {
         if(!assertion.ok) {
             tapParser.currentBox.addClass("chrome-tap-failed");
         }
-        
+
+        pathToScpUrlLink(assertion.name, line);
         tapParser.currentBox.append(line);
+        tapParser.currentBox.append($("<br>"));
     });
     
     tapParser.on('child', function(childParser) {
@@ -202,15 +248,6 @@ $(document).ready(function() {
             case "TAP_SWITCH_VIEW":
                 tapSwitchView($(preNode));
                 break;
-            case "TAP_SWITCH_HIDE_PASSES":
-                tapHidePasses();
-                break;
-            case "TAP_NEXT_FAILURE":
-                tapNextFailure();
-                break;
-            case "TAP_PREVIOUS_FAILURE":
-                tapPreviousFailure();
-                break;
             }
         });
         
@@ -219,9 +256,22 @@ $(document).ready(function() {
     function processDocument() {
         $(preNode).removeAttr('style');
         $(preNode).addClass("chrome-tap-pre chrome-tap-invisible");
+
+        var toolbar = $("<div class=\"chrome-tap-toolbar\" id=\"chrome-tap-toolbar\">" 
+                        + "<ul>"
+                        + "<li id=\"chrome-tap-pie\"><span>&nbsp;</span></li>"
+                        + "<li id=\"chrome-tap-shell\"><a href=\"javascript:void(0)\">&#x1f4bb</a></li>"
+                        + "<li id=\"chrome-tap-next\"><a href=\"javascript:void(0)\">Next</a></li>"
+                        + "<li id=\"chrome-tap-previous\"><a href=\"javascript:void(0)\">Previous</a></li>"
+                        + "</ul></div>");
         
         var newdiv = $("<div id=\"chrome-tap-parsed-output-boxed\"></div>");
+        $("body").append(toolbar);
         $("body").append(newdiv);
+        $("#chrome-tap-shell").click(App.shellPrompt);
+        $("#chrome-tap-previous").click(App.previousFailure);
+        $("#chrome-tap-next").click(App.nextFailure);
+                
         newdiv.addClass("chrome-tap-pre");
         
         var currentBox = boxAtIndent(0);
@@ -233,7 +283,19 @@ $(document).ready(function() {
         addEventHandlers(p);
         
         p.write(data);
-        p.end();   
+        p.end();
+
+        for(var key in App.scpPaths) {
+            var value = App.scpPaths[key];
+            function clickHandlerMaker(x) {
+                return function() {
+                    window.open(x);
+                    console.log("Navigating to " + x);
+                };
+            };
+            
+            $("#" + key).click(clickHandlerMaker(value));
+        }
     }
         
     // Look for a TAP plan (1..N) as evidence that this is TAP data

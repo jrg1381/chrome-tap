@@ -1,5 +1,3 @@
-var isPassesHidden = false;
-
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     // The page can send us messages if the extension loads inside it and finds TAP.
     var response = "";
@@ -51,20 +49,7 @@ function sendMessage(message, data) {
     });
 }
 
-function previousFailure() {
-    sendMessage("TAP_PREVIOUS_FAILURE");
-}
-
-function nextFailure() {
-    sendMessage("TAP_NEXT_FAILURE");
-}
-
 function switchView() {
     sendMessage("TAP_SWITCH_VIEW");
-}
-
-function hidePasses() {
-    sendMessage("TAP_SWITCH_HIDE_PASSES");
-    isPassesHidden = !isPassesHidden;
 }
 

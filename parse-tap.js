@@ -8,21 +8,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var viewButton = document.getElementById('parse-button');
     viewButton.onclick = backgroundPage.switchView;
 
-    var previousButton = document.getElementById('previous');
-    previousButton.onclick = backgroundPage.previousFailure;
-    
-    var nextButton = document.getElementById('next');
-    nextButton.onclick = backgroundPage.nextFailure;
-
     var optionsButton = document.getElementById('options');
     optionsButton.onclick = function() {
         chrome.runtime.openOptionsPage();
     };
-    
-//    var hidePassedTestsCheckbox = document.getElementById('hide-passed-tests');
-
-//    hidePassedTestsCheckbox.checked = backgroundPage.isPassesHidden;
-//    hidePassedTestsCheckbox.onchange = backgroundPage.hidePasses;
 });
 
 
