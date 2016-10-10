@@ -22,9 +22,12 @@
     
     "content_scripts" : [
         {
-            "css" : ["tap.css"],
+            "css" : [
+                "tap.css",
+                "jqtree.css"],
             "js" : [
                 "node_modules/jquery/dist/jquery.min.js",
+                "tree.jquery.js",
                 "directoryTree.js",
                 "content-script-bundle.js"],
             "matches": ["*://*/*.txt", "*://*/*text"]

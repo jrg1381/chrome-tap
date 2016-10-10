@@ -46,7 +46,7 @@ App.previousFailure = function tapPreviousFailure() {
 
 App.shellPrompt = function shellPrompt() {
     alert(JSON.stringify(App.directoryTree));
-    App.directoryTree.getPaths();
+    App.directoryTree.convertForJqTree();
 }
 
 function okOrNotOkClass(pass)
@@ -205,13 +205,16 @@ $(document).ready(function() {
         var toolbar = $("<div class=\"chrome-tap-toolbar\" id=\"chrome-tap-toolbar\">" 
                         + "<ul>"
                         + "<li id=\"chrome-tap-pie\"><span>&nbsp;</span></li>"
-                        + "<li id=\"chrome-tap-shell\"><a href=\"javascript:void(0)\">&#x1f4bb</a></li>"
+                        + "<li id=\"chrome-tap-shell\"><a href=\"javascript:void(0)\">&#x1f4bb;&#xfe0e;</a></li>"
                         + "<li id=\"chrome-tap-next\"><a href=\"javascript:void(0)\">Next</a></li>"
                         + "<li id=\"chrome-tap-previous\"><a href=\"javascript:void(0)\">Previous</a></li>"
                         + "</ul></div>");
+
+        var tree = $("<div id=\"chrome-tap-tree\"></div>");
         
         var newdiv = $("<div id=\"chrome-tap-parsed-output-boxed\"></div>");
         $("body").append(toolbar);
+        $("body").append(tree);
         $("body").append(newdiv);
         $("#chrome-tap-shell").click(App.shellPrompt);
         $("#chrome-tap-previous").click(App.previousFailure);
@@ -241,6 +244,16 @@ $(document).ready(function() {
             
             $("#" + key).click(clickHandlerMaker(value));
         }
+
+        var treeData = App.directoryTree.convertForJqTree();
+        
+        $("#chrome-tap-tree").tree(
+            { data : treeData,
+              autoOpen : 4,
+              onCreateLi : function(node, $li) {
+                  $li.find('.jqtree-title').after('<span>&#x1f4bb;&#xfe0e;</span>');
+              }
+            });
     }
         
     // Look for a TAP plan (1..N) as evidence that this is TAP data

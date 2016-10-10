@@ -20,6 +20,12 @@ var DirectoryTree = function() {
         var currentNode = self.root;
         
         pathElements.forEach(function(element, index, array) {
+            if(element == "..") {
+                // Not so fast, my fine friend!
+                return;
+//                currentNode = self.addToNode(array[index-1], currentNode);
+            }
+            
             var matches = element.match(self.hostRegexp);
             if(matches != null && matches.length > 0) {
                 self.host = matches[1];
@@ -28,27 +34,34 @@ var DirectoryTree = function() {
         });
     }
 
-    DirectoryTree.prototype.depthFirstTraversal = function(node, currentStack, leafNodeVisitor) {
-        var leafNode = true;
-        
-        for(var child in node) {
-            leafNode = false;
-            currentStack.push(child);
-            self.depthFirstTraversal(node[child], currentStack, leafNodeVisitor);
-        }
+    DirectoryTree.prototype.probablyFilename = function(filename) {
+        return filename.endsWith(".json")
+            || filename.endsWith(".zip")
+            || filename.endsWith(".out")
+            || filename.endsWith(".log")
+            || filename.endsWith(".xml")
+            || filename.endsWith(".html");
 
-        if(leafNode) {
-            leafNodeVisitor(currentStack);
-        }
-        
-        currentStack.pop();
     }
     
-    DirectoryTree.prototype.getPaths = function() {
-        var paths = [];
-        self.depthFirstTraversal(self.root, [], function(pathStack) {
-            paths.push(pathStack.slice());
-        });
-        console.log(paths);
+    DirectoryTree.prototype.depthFirstTraversal = function(root, parentNode) { 
+        for(var child in root) {
+            // Make the wild guess that filenames with . in them are files, not directories
+            if(self.probablyFilename(child)) {
+                console.log(child);
+                continue;
+            }
+            var newNode = { name : child, children: [] };
+            parentNode.children.push(newNode);
+            self.depthFirstTraversal(root[child], newNode);
+        }
+    }
+    
+    DirectoryTree.prototype.convertForJqTree = function() {
+        var data = {name : "/", children: []};
+        self.depthFirstTraversal(self.root[""], data);
+        // It has to be in an array to represent multiple top-level nodes to jqTree.
+        // As we're a filesystem we only have /, so wrap the object in an array here to keep jqTree happy.
+        return [data];
     }
 }
