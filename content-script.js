@@ -45,8 +45,13 @@ App.previousFailure = function tapPreviousFailure() {
 }
 
 App.shellPrompt = function shellPrompt() {
-    alert(JSON.stringify(App.directoryTree));
-    App.directoryTree.convertForJqTree();
+    var menu = $("#chrome-tap-tree");
+    var parent = $("#chrome-tap-shell");
+    var parentPosition = parent.offset();
+    parentPosition.left = parentPosition.left - menu.width() + parent.width();
+    parentPosition.top += parent.height();
+    menu.css(parentPosition);
+    menu.slideToggle();
 }
 
 function okOrNotOkClass(pass)
@@ -211,10 +216,15 @@ $(document).ready(function() {
                         + "</ul></div>");
 
         var tree = $("<div id=\"chrome-tap-tree\"></div>");
+        tree.hide();
+
+        var treeContainer = $("<div id=\"chrome-tap-tree-container\"></div>");
+        treeContainer.append(tree);
         
         var newdiv = $("<div id=\"chrome-tap-parsed-output-boxed\"></div>");
+        
         $("body").append(toolbar);
-        $("body").append(tree);
+        $("body").append(treeContainer);
         $("body").append(newdiv);
         $("#chrome-tap-shell").click(App.shellPrompt);
         $("#chrome-tap-previous").click(App.previousFailure);
@@ -237,7 +247,7 @@ $(document).ready(function() {
             var value = App.scpPaths[key];
             function clickHandlerMaker(x) {
                 return function() {
-                    window.open(x);
+                    document.location = x;
                     console.log("Navigating to " + x);
                 };
             };
@@ -251,9 +261,30 @@ $(document).ready(function() {
             { data : treeData,
               autoOpen : 4,
               onCreateLi : function(node, $li) {
-                  $li.find('.jqtree-title').after('<span>&#x1f4bb;&#xfe0e;</span>');
-              }
+                  var path = [];
+                  var currentNode = node;
+
+                  while(currentNode.name != "/") {
+                      path.unshift(currentNode.name);
+                      currentNode = currentNode.parent;
+                  }
+                  
+                  var link = "ssh://"
+                      + App.username
+                      + "@"
+                      + App.directoryTree.host
+                      + "/"
+                      + path.join("/")
+                      + "/";
+                  
+                  var span = $('<span>&nbsp;&#x1f4bb;&#xfe0e;</span>');
+                  span.click(function() { document.location = link; });
+                  $li.find('.jqtree-title').after(span);
+              },
+              selectable : false
             });
+
+        treeContainer.css("top",toolbar.height());
     }
         
     // Look for a TAP plan (1..N) as evidence that this is TAP data

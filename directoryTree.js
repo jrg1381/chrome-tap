@@ -15,6 +15,10 @@ var DirectoryTree = function() {
     // Given a path that looks like foo/bar/baz, add the elements to the directory tree
     // such that if foo/bar has already been seen, it will not be added again. The intent
     // is to take a set of file paths and recreate the directory structure from them.
+    //
+    // We also have to treat ".." specially and proceed to the next element if it's encountered.
+    // This has the effect of going up a directory, so that with the input "a/b/../c", "c" is
+    // made a child of "a".
     DirectoryTree.prototype.add = function(path) {
         var pathElements = path.split('/');
         var currentNode = self.root;
@@ -23,7 +27,6 @@ var DirectoryTree = function() {
             if(element == "..") {
                 // Not so fast, my fine friend!
                 return;
-//                currentNode = self.addToNode(array[index-1], currentNode);
             }
             
             var matches = element.match(self.hostRegexp);
@@ -40,6 +43,9 @@ var DirectoryTree = function() {
             || filename.endsWith(".out")
             || filename.endsWith(".log")
             || filename.endsWith(".xml")
+            || filename.endsWith(".pm")
+            || filename.endsWith(".t")
+            || filename.endsWith(".txt")
             || filename.endsWith(".html");
 
     }

@@ -4,7 +4,18 @@
     font-family : monospace;
 }
 
+#chrome-tap-tree-container {
+    position : fixed;
+    width : 100%;
+    padding-top : 7px;
+}
+
 #chrome-tap-tree {
+    font-family: sans-serif;
+    float : right;
+    z-order : 1;
+    margin-right : 8px;
+    background-color : aliceblue;
     border : 1px;
     border-style : solid;
     border-color : black;
@@ -62,6 +73,10 @@
 
 .chrome-tap-scp:hover {
     cursor : pointer;
+}
+
+.chrome-tap-skip {
+    color : purple;
 }
 
 .chrome-tap-extra-line {
