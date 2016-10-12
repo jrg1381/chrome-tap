@@ -7,9 +7,13 @@ App.invisibleClass = "chrome-tap-invisible";
 App.username = "(unset)";
 App.scpPaths = {};
 App.scpRegex = new RegExp("(?: |^)(/(?:scratch|export)/buildbot/slave-(.*?)(?:/[^/]+/)+[^ ]+)(?: |$)","g");
-App.finalResult = true; // assume pass
+App.finalResult = true; // assume passing test
+App.currentDepth = 0;
+App.indentDepthPixels = 25;
 
-function reportTapStatus(message, processDocumentCallback) {
+/* Tell the background page outside the content script whether the page is TAP or not.
+   The response from the background page contains the user configuration information */
+App.reportTapStatus = function(message, processDocumentCallback) {
     console.log(message);
     chrome.runtime.sendMessage({msg : message},
                                function(response) {
@@ -19,13 +23,15 @@ function reportTapStatus(message, processDocumentCallback) {
                                });
 }
 
-function spanWithClass(contents, spanClass) {
+/* Return <span class="spanClass">content</span> as a jQuery object */
+App.spanWithClass = function(contents, spanClass) {
     var span = $("<span class=\""+spanClass+"\"></span>");
     span.text(contents);
     return span;
 }
 
-function tapSwitchView(preNode) {
+/* Show/hide the original TAP output */
+App.tapSwitchView = function(preNode) {
     if(App.showingParsedTap) {
         preNode.removeClass(App.invisibleClass);
         $("#chrome-tap-parsed-output").addClass(App.invisibleClass);
@@ -36,14 +42,17 @@ function tapSwitchView(preNode) {
     App.showingParsedTap = !App.showingParsedTap;
 }
 
+/* Action to perform when the 'Next' button is clicked */
 App.nextFailure = function tapNextFailure() {
     window.find("not ok", true, false, true, false, false, false);
 }
 
+/* Action to perform when the 'Previous' button is clicked */
 App.previousFailure = function tapPreviousFailure() {
     window.find("not ok", true, true, true, false, false, false);
 }
 
+/* Action to perform when the shell prompt icon is clicked */
 App.shellPrompt = function shellPrompt() {
     var menu = $("#chrome-tap-tree");
     var parent = $("#chrome-tap-shell");
@@ -51,21 +60,33 @@ App.shellPrompt = function shellPrompt() {
     parentPosition.left = parentPosition.left - menu.width() + parent.width();
     parentPosition.top += parent.height();
     menu.css(parentPosition);
-    menu.slideToggle();
+
+    if(menu.is(":visible")) {
+        return;
+    }
+    
+    menu.slideToggle( {
+        complete : function() {
+            $('html').click(function(event) {
+                if($(event.target).parents('#chrome-tap-tree').length == 0) {
+                    $('#chrome-tap-tree').slideToggle();
+                    $(this).unbind(event);
+                }
+            });
+        }
+    });
 }
 
-function okOrNotOkClass(pass)
-{
+/* Return the class to use for assertions. */
+App.okOrNotOkClass = function okOrNotOkClass(pass) {
     return pass ? "chrome-tap-ok" : "chrome-tap-not-ok";
 }
 
-function boxAtIndent(level) {
+App.boxAtIndent = function boxAtIndent(level) {
     var currentBox = $("<div class=\"chrome-tap-box\"></div>");
-    currentBox.css("margin-left",level*25+"px");
+    currentBox.css("margin-left",level*App.indentDepthPixels+"px");
     return currentBox;
 }
-
-var currentDepth = 0;
 
 function getMatches(input, regex, index) {
     index || (index = 1); // first capturing group
@@ -111,7 +132,7 @@ function getMatches(input, regex, index) {
 function addEventHandlers(tapParser) {      
     tapParser.on('comment', function(comment) {
         comment = comment.trim("\n");
-        var line = spanWithClass(comment, "chrome-tap-comment");
+        var line = App.spanWithClass(comment, "chrome-tap-comment");
         pathToScpUrlLink(comment, line);
         tapParser.currentBox.append(line);
         tapParser.currentBox.append($("<br>"));
@@ -119,14 +140,14 @@ function addEventHandlers(tapParser) {
 
     tapParser.on('extra', function(extraLine) {
         extraLine = extraLine.trim("\n");
-        var line = spanWithClass(extraLine, "chrome-tap-extra-line");
+        var line = App.spanWithClass(extraLine, "chrome-tap-extra-line");
         pathToScpUrlLink(extraLine, line);
         tapParser.currentBox.append(line);
         tapParser.currentBox.append($("<br>"));
     });
     
     tapParser.on('complete', function(results) {
-        currentDepth--;
+        App.currentDepth--;
         var current = tapParser.currentBox;
         var parent = tapParser.currentBox.parent();
         
@@ -137,7 +158,7 @@ function addEventHandlers(tapParser) {
         }
         
         tapParser.currentBox = parent;
-        if(currentDepth == 0) {
+        if(App.currentDepth == 0) {
             if(App.finalResult && results.ok) {
                 $("#chrome-tap-pie").css("background-color","green");
             } else {
@@ -148,7 +169,7 @@ function addEventHandlers(tapParser) {
     });
     
     tapParser.on('plan', function(plan) {
-        var line = spanWithClass(plan.start + ".." + plan.end,
+        var line = App.spanWithClass(plan.start + ".." + plan.end,
                                  "chrome-tap-plan");
         tapParser.currentBox.append(line);
         tapParser.currentBox.append($("<br>"));
@@ -164,11 +185,11 @@ function addEventHandlers(tapParser) {
             assertionName = assertion.name;
         }
                 
-        var line = spanWithClass([assertion.ok ? "ok" : "not ok",
-                                  assertion.id,
-                                  "-",
-                                  assertionName].join(" "),
-                                 okOrNotOkClass(assertion.ok));
+        var line = App.spanWithClass([assertion.ok ? "ok" : "not ok",
+                                      assertion.id,
+                                      "-",
+                                      assertionName].join(" "),
+                                     App.okOrNotOkClass(assertion.ok));
         
         if(!assertion.ok) {
             tapParser.currentBox.addClass("chrome-tap-failed");
@@ -180,8 +201,8 @@ function addEventHandlers(tapParser) {
     });
     
     tapParser.on('child', function(childParser) {
-        currentDepth++;
-        newBox = boxAtIndent(currentDepth);
+        App.currentDepth++;
+        newBox = App.boxAtIndent(App.currentDepth);
         tapParser.currentBox.append(newBox);
         childParser.currentBox = newBox;
         addEventHandlers(childParser);
@@ -196,7 +217,7 @@ $(document).ready(function() {
         function(request, sender, sendResponse) {
             switch(request.msg) {
             case "TAP_SWITCH_VIEW":
-                tapSwitchView($(preNode));
+                App.tapSwitchView($(preNode));
                 break;
             }
         });
@@ -221,7 +242,7 @@ $(document).ready(function() {
         var treeContainer = $("<div id=\"chrome-tap-tree-container\"></div>");
         treeContainer.append(tree);
         
-        var newdiv = $("<div id=\"chrome-tap-parsed-output-boxed\"></div>");
+        var newdiv = $("<div id=\"chrome-tap-parsed-output-boxed\" class=\"chrome-tap-pre\"></div>");
         
         $("body").append(toolbar);
         $("body").append(treeContainer);
@@ -229,10 +250,8 @@ $(document).ready(function() {
         $("#chrome-tap-shell").click(App.shellPrompt);
         $("#chrome-tap-previous").click(App.previousFailure);
         $("#chrome-tap-next").click(App.nextFailure);
-                
-        newdiv.addClass("chrome-tap-pre");
         
-        var currentBox = boxAtIndent(0);
+        var currentBox = App.boxAtIndent(0);
         newdiv.append(currentBox);
         
         var p = new App.parser({preserveWhitespace : true});
@@ -289,9 +308,9 @@ $(document).ready(function() {
         
     // Look for a TAP plan (1..N) as evidence that this is TAP data
     if(data != null && /1\.\.\d+/.test(data)) {
-        reportTapStatus("TAP_START", processDocument);
+        App.reportTapStatus("TAP_START", processDocument);
     } else {
-        reportTapStatus("TAP_END", function() {});
+        App.reportTapStatus("TAP_END", function() {});
         return;
     }
 });
