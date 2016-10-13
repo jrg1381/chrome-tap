@@ -16,19 +16,21 @@ var DirectoryTree = function() {
     // such that if foo/bar has already been seen, it will not be added again. The intent
     // is to take a set of file paths and recreate the directory structure from them.
     //
-    // We also have to treat ".." specially and proceed to the next element if it's encountered.
-    // This has the effect of going up a directory, so that with the input "a/b/../c", "c" is
-    // made a child of "a".
+    // We also have to treat ".." specially.
     DirectoryTree.prototype.add = function(path) {
         var pathElements = path.split('/');
         var currentNode = self.root;
-        
+        var filteredPathElements = [];
+
         pathElements.forEach(function(element, index, array) {
-            if(element == "..") {
-                // Not so fast, my fine friend!
+            if(element === "..") {
+                filteredPathElements.pop();
                 return;
             }
-            
+            filteredPathElements.push(element);
+        });
+        
+        filteredPathElements.forEach(function(element, index, array) {            
             var matches = element.match(self.hostRegexp);
             if(matches != null && matches.length > 0) {
                 self.host = matches[1];
@@ -38,21 +40,16 @@ var DirectoryTree = function() {
     }
 
     DirectoryTree.prototype.probablyFilename = function(filename) {
-        return filename.endsWith(".json")
-            || filename.endsWith(".zip")
-            || filename.endsWith(".out")
-            || filename.endsWith(".log")
-            || filename.endsWith(".xml")
-            || filename.endsWith(".pm")
-            || filename.endsWith(".t")
-            || filename.endsWith(".txt")
-            || filename.endsWith(".html");
-
+        var probablyFileExtensions = ["json","zip","out","log","xml","pm","t","txt","html"];
+        return probablyFileExtensions.some(function(element, index, array) {
+            return filename.endsWith("." + element);
+        });
     }
     
     DirectoryTree.prototype.depthFirstTraversal = function(root, parentNode) { 
         for(var child in root) {
-            // Make the wild guess that filenames with . in them are files, not directories
+            // Make the wild guess that filenames with . in them are files, not directories,
+            // but use a whitelist so we don't trip on things like "results.default"
             if(self.probablyFilename(child)) {
                 console.log(child);
                 continue;
