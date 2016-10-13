@@ -88,7 +88,7 @@ App.boxAtIndent = function boxAtIndent(level) {
     return currentBox;
 }
 
-function getMatches(input, regex, index) {
+App.getMatches = function getMatches(input, regex, index) {
     index || (index = 1); // first capturing group
     var matches = [];
     var match;
@@ -103,8 +103,8 @@ function getMatches(input, regex, index) {
     function pathToScpUrlLink(path, parentDOMItem) {
         var result = {};
         // This goes through twice, inefficient
-        var paths = getMatches(path, App.scpRegex, 1);
-        var hostnames = getMatches(path, App.scpRegex, 2);
+        var paths = App.getMatches(path, App.scpRegex, 1);
+        var hostnames = App.getMatches(path, App.scpRegex, 2);
         var innerText = parentDOMItem.text();
         
         for(var i=0;i<paths.length;i++) {
@@ -272,6 +272,7 @@ $(document).ready(function() {
             };
             
             $("#" + key).click(clickHandlerMaker(value));
+            $("#" + key).attr('title', value);
         }
 
         var treeData = App.directoryTree.convertForJqTree();
