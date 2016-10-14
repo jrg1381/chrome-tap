@@ -76,8 +76,7 @@ var CtApp = function(preNode, data) {
             comment = comment.trim("\n");
             var line = self.ui.spanWithClass(comment, "chrome-tap-comment");
             self.pathToScpUrlLink(comment, line);
-            tapParser.currentBox.append(line);
-            tapParser.currentBox.append($("<br>"));
+            self.addLineToBox(tapParser.currentBox, line);
         });
         
         tapParser.on('extra', function(extraLine) {
