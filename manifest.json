@@ -30,6 +30,7 @@
                 "tree.jquery.js",
                 "directoryTree.js",
                 "CtAppUi.js",
+                "FilenameMatcher.js",
                 "CtAppBundle.js"],
             "matches": ["*://*/*.txt", "*://*/*text"]
         }

@@ -8,12 +8,12 @@ var CtApp = function(preNode, data) {
     self.directoryTree = new DirectoryTree();
     self.username = "(unset)";
     self.scpPaths = {};
-    self.scpRegex = new RegExp("(?: |^)(/(?:scratch|export)/buildbot/slave-(.*?)(?:/[^/]+/)+[^ ]+)(?: |$)","g");
     self.finalResult = true; // assume passing test
     self.currentDepth = 0;
     self.indentDepthPixels = 25;
     self.parsedOutputContainer = null;
     self.spanIdCounter = 0;
+    self.filenameMatcher = new FilenameMatcher();
 
     /* Tell the background page outside the content script whether the page is TAP or not.
        The response from the background page contains the user configuration information */
@@ -27,31 +27,6 @@ var CtApp = function(preNode, data) {
                                    });
     }
 
-    /* Action to perform when the shell prompt icon is clicked */
-    CtApp.prototype.shellPrompt = function shellPrompt() {
-        var menu = $("#chrome-tap-tree");
-        var parent = $("#chrome-tap-shell");
-        var parentPosition = parent.offset();
-        parentPosition.left = parentPosition.left - menu.width() + parent.width();
-        parentPosition.top += parent.height();
-        menu.css(parentPosition);
-        
-        if(menu.is(":visible")) {
-            return;
-        }
-        
-        menu.slideToggle( {
-            complete : function() {
-                $('html').click(function(event) {
-                    if($(event.target).parents('#chrome-tap-tree').length == 0) {
-                        $('#chrome-tap-tree').slideToggle();
-                        $(this).unbind(event);
-                    }
-                });
-            }
-        });
-    }
-
     /* Return the class to use for assertions. */
     CtApp.prototype.okOrNotOkClass = function okOrNotOkClass(pass) {
         return pass ? "chrome-tap-ok" : "chrome-tap-not-ok";
@@ -63,44 +38,39 @@ var CtApp = function(preNode, data) {
         return currentBox;
     }
 
-    CtApp.prototype.getMatches = function getMatches(input, regex, index) {
-        index || (index = 1); // first capturing group
-        var matches = [];
-        var match;
-        while(match = regex.exec(input)) {
-            matches.push(match[index]);
-        }
-        return matches;
-    }  
-
     CtApp.prototype.pathToScpUrlLink = function pathToScpUrlLink(path, parentDOMItem) {
-        var result = {};
-        // This goes through twice, inefficient
-        var paths = self.getMatches(path, self.scpRegex, 1);
-        var hostnames = self.getMatches(path, self.scpRegex, 2);
+        var regexMatches = self.filenameMatcher.Match(path);
         var innerText = parentDOMItem.text();
         
-        for(var i=0;i<paths.length;i++) {
-            self.directoryTree.add(paths[i]);
+        for(var i=0;i<regexMatches.paths.length;i++) {
+            var path = regexMatches.paths[i];
+            var host = regexMatches.hostnames[i];
+            
+            self.directoryTree.add(path);
             
             var url = "scp://"
                 + self.username
                 + "@"
-                + hostnames[i]
-                + paths[i];
+                + host
+                + path;
             
             // Chop off the filename (but this is wrong if the path actually is a directory...)
             url = url.substring(0, url.lastIndexOf("/")+1);
             
             var id = "ct-link-" + (self.spanIdCounter++);
             var link = "<span class=\"chrome-tap-scp\" id=\"" + id + "\">&#x21af;</span>";
-            innerText = innerText.replace(paths[i],link + paths[i]);
+            innerText = innerText.replace(path,link + path);
             self.scpPaths[id] = url;
         }
         
         parentDOMItem.html(innerText);
     }
 
+    CtApp.prototype.addLineToBox = function(box, line) {
+        box.append(line);
+        box.append($("<br>"));
+    }
+    
     CtApp.prototype.addEventHandlers = function addEventHandlers(tapParser) {      
         tapParser.on('comment', function(comment) {
             comment = comment.trim("\n");
@@ -114,8 +84,7 @@ var CtApp = function(preNode, data) {
             extraLine = extraLine.trim("\n");
             var line = self.ui.spanWithClass(extraLine, "chrome-tap-extra-line");
             self.pathToScpUrlLink(extraLine, line);
-            tapParser.currentBox.append(line);
-            tapParser.currentBox.append($("<br>"));
+            self.addLineToBox(tapParser.currentBox, line);
         });
         
         tapParser.on('complete', function(results) {
@@ -144,9 +113,8 @@ var CtApp = function(preNode, data) {
         
         tapParser.on('plan', function(plan) {
             var line = self.ui.spanWithClass(plan.start + ".." + plan.end,
-                                            "chrome-tap-plan");
-            tapParser.currentBox.append(line);
-            tapParser.currentBox.append($("<br>"));
+                                             "chrome-tap-plan");
+            self.addLineToBox(tapParser.currentBox, line);
         });
         
         tapParser.on('assert', function(assertion) {
@@ -170,8 +138,7 @@ var CtApp = function(preNode, data) {
             }
             
             self.pathToScpUrlLink(assertion.name, line);
-            tapParser.currentBox.append(line);
-            tapParser.currentBox.append($("<br>"));
+            self.addLineToBox(tapParser.currentBox, line);
         });
         
         tapParser.on('child', function(childParser) {
@@ -188,11 +155,7 @@ var CtApp = function(preNode, data) {
         $(self.preNode).removeAttr('style');
         $(self.preNode).addClass("chrome-tap-pre chrome-tap-invisible");
         
-        self.ui.addToolbar(body,
-                          {
-                              shellPrompt : self.shellPrompt
-                          });
-        
+        self.ui.addToolbar(body);
         self.parsedOutputContainer = self.ui.addParsedOutputContainer(body);
         
         var currentBox = self.boxAtIndent(0);

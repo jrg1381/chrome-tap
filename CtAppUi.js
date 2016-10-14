@@ -22,7 +22,7 @@ var CtAppUi = function(preNode) {
         window.find("not ok", true, true, true, false, false, false);
     }
 
-    CtAppUi.prototype.addToolbar = function addToolbar(body, callbacks) {
+    CtAppUi.prototype.addToolbar = function addToolbar(body) {
         self.toolbar = $("<div class=\"chrome-tap-toolbar\" id=\"chrome-tap-toolbar\">" 
                          + "<ul>"
                          + "<li id=\"chrome-tap-pie\"><span>&nbsp;</span></li>"
@@ -39,8 +39,10 @@ var CtAppUi = function(preNode) {
                 
         body.append(self.toolbar);
         body.append(self.treeContainer);
+
+        self.menuButton = $("#chrome-tap-shell");
         
-        $("#chrome-tap-shell").click(callbacks.shellPrompt);
+        $("#chrome-tap-shell").click(self.showShellPromptMenu);
         $("#chrome-tap-previous").click(self.previousFailure);
         $("#chrome-tap-next").click(self.nextFailure);
 
@@ -61,6 +63,29 @@ var CtAppUi = function(preNode) {
     
     CtAppUi.prototype.setTestStatusIndicator = function setTestStatusIndicator(color) {
         self.testIndicator.css("background-color", color);
+    }
+
+    /* Action to perform when the shell prompt icon is clicked */
+    CtAppUi.prototype.showShellPromptMenu = function shellPrompt() {
+        var parentPosition = self.menuButton.offset();
+        parentPosition.left = parentPosition.left - self.tree.width() + self.menuButton.width();
+        parentPosition.top += self.menuButton.height();
+        self.tree.css(parentPosition);
+        
+        if(self.tree.is(":visible")) {
+            return;
+        }
+        
+        self.tree.slideToggle( {
+            complete : function() {
+                $('html').click(function(event) {
+                    if($(event.target).parents('#chrome-tap-tree').length == 0) {
+                        self.tree.slideToggle();
+                        $(this).unbind(event);
+                    }
+                });
+            }
+        });
     }
     
     CtAppUi.prototype.addTreeData = function addTreeData(treeData, username, host) {
