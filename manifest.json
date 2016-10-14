@@ -29,7 +29,8 @@
                 "node_modules/jquery/dist/jquery.min.js",
                 "tree.jquery.js",
                 "directoryTree.js",
-                "content-script-bundle.js"],
+                "CtAppUi.js",
+                "CtAppBundle.js"],
             "matches": ["*://*/*.txt", "*://*/*text"]
         }
     ],

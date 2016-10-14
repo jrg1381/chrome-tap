@@ -6,4 +6,4 @@ if [ -z $(which browserify) ]; then
 fi
 
 npm install
-browserify content-script.js -o content-script-bundle.js
+browserify CtApp.js -o CtAppBundle.js

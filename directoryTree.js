@@ -51,7 +51,7 @@ var DirectoryTree = function() {
             // Make the wild guess that filenames with . in them are files, not directories,
             // but use a whitelist so we don't trip on things like "results.default"
             if(self.probablyFilename(child)) {
-                console.log(child);
+//                console.log(child);
                 continue;
             }
             var newNode = { name : child, children: [] };
