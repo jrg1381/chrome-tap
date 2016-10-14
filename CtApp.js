@@ -13,6 +13,7 @@ var CtApp = function(preNode, data) {
     self.currentDepth = 0;
     self.indentDepthPixels = 25;
     self.parsedOutputContainer = null;
+    self.spanIdCounter = 0;
 
     /* Tell the background page outside the content script whether the page is TAP or not.
        The response from the background page contains the user configuration information */
@@ -72,35 +73,32 @@ var CtApp = function(preNode, data) {
         return matches;
     }  
 
-    {
-        var counter = 0;
-        CtApp.prototype.pathToScpUrlLink = function pathToScpUrlLink(path, parentDOMItem) {
-            var result = {};
-            // This goes through twice, inefficient
-            var paths = self.getMatches(path, self.scpRegex, 1);
-            var hostnames = self.getMatches(path, self.scpRegex, 2);
-            var innerText = parentDOMItem.text();
+    CtApp.prototype.pathToScpUrlLink = function pathToScpUrlLink(path, parentDOMItem) {
+        var result = {};
+        // This goes through twice, inefficient
+        var paths = self.getMatches(path, self.scpRegex, 1);
+        var hostnames = self.getMatches(path, self.scpRegex, 2);
+        var innerText = parentDOMItem.text();
+        
+        for(var i=0;i<paths.length;i++) {
+            self.directoryTree.add(paths[i]);
             
-            for(var i=0;i<paths.length;i++) {
-                self.directoryTree.add(paths[i]);
-                
-                var url = "scp://"
-                    + self.username
-                    + "@"
-                    + hostnames[i]
-                    + paths[i];
-                
-                // Chop off the filename (but this is wrong if the path actually is a directory...)
-                url = url.substring(0, url.lastIndexOf("/")+1);
-                
-                var id = "ct-link-" + (counter++);
-                var link = "<span class=\"chrome-tap-scp\" id=\"" + id + "\">&#x21af;</span>";
-                innerText = innerText.replace(paths[i],link + paths[i]);
-                self.scpPaths[id] = url;
-            }
+            var url = "scp://"
+                + self.username
+                + "@"
+                + hostnames[i]
+                + paths[i];
             
-            parentDOMItem.html(innerText);
+            // Chop off the filename (but this is wrong if the path actually is a directory...)
+            url = url.substring(0, url.lastIndexOf("/")+1);
+            
+            var id = "ct-link-" + (self.spanIdCounter++);
+            var link = "<span class=\"chrome-tap-scp\" id=\"" + id + "\">&#x21af;</span>";
+            innerText = innerText.replace(paths[i],link + paths[i]);
+            self.scpPaths[id] = url;
         }
+        
+        parentDOMItem.html(innerText);
     }
 
     CtApp.prototype.addEventHandlers = function addEventHandlers(tapParser) {      
