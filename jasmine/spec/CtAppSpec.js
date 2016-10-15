@@ -38,4 +38,23 @@ describe("FilenameMatcher", function() {
         expect(matches.paths[1]).toBe("/scratch/buildbot/slave-foobar/sometest-else/foo.txt");
     });
 });
-      
+
+describe("DirectoryTree", function() {
+    var tree;
+
+    beforeEach(function() {
+        tree = new DirectoryTree();
+    });
+    
+    it("Tree accepts a single path", function() {
+        tree.add("/this/that/other/and/more/things");
+        expect(JSON.stringify(tree)).toBe('{"root":{"":{"this":{"that":{"other":{"and":{"more":{"things":{}}}}}}}},"host":"(unset)","hostRegexp":{}}');
+    });
+
+    it("Tree converts to jqtree format correctly", function() {
+        tree.add("/this/that/other/and/more/things");
+        tree.add("/this/that/other/and/different/path");
+        expect(JSON.stringify(tree.convertForJqTree())).toBe('[{"name":"/","children":[{"name":"this","children":[{"name":"that","children":[{"name":"other","children":[{"name":"and","children":[{"name":"more","children":[{"name":"things","children":[]}]},{"name":"different","children":[{"name":"path","children":[]}]}]}]}]}]}]}]');
+    });
+});
+
