@@ -149,8 +149,8 @@ var CtApp = function(preNode, data) {
         });
     }
 
-    CtApp.prototype.processDocument = function processDocument() {
-        var body = $("body");
+    CtApp.prototype.processDocument = function processDocument(documentBody) {
+        var body = documentBody || $("body");
         $(self.preNode).removeAttr('style');
         $(self.preNode).addClass("chrome-tap-pre chrome-tap-invisible");
         
@@ -219,3 +219,4 @@ $(document).ready(function() {
     }
 });
 
+window.CtApp = CtApp;
