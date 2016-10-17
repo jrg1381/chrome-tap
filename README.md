@@ -1,6 +1,12 @@
 # chrome-tap
 Chrome extension for processing Test Anything Protocol
 
-## TODO
+## Building
 
-Use the proper javascript TAP parser to fully understand subtests, YAML etc.
+Chrome TAP uses browserify to use node modules inside browser javascript.
+
+1. Run `npm install` to get the packages
+2. Run .\build.sh to browserify the application
+3. Load the whole directory into Chrome as an extension
+
+
