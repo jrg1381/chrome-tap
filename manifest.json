@@ -26,12 +26,11 @@
                 "tap.css",
                 "jqtree.css"],
             "js" : [
-                "node_modules/jquery/dist/jquery.min.js",
-                "tree.jquery.js",
                 "directoryTree.js",
                 "CtAppUi.js",
                 "FilenameMatcher.js",
-                "CtAppBundle.js"],
+                "CtAppBundle.js",
+                "documentReady.js"],
             "matches": ["*://*/*.txt", "*://*/*text"]
         }
     ],

@@ -1,4 +1,11 @@
+var jq = require('jquery');
+window.jQuery = jq; // Need to do this so jqTree can see jQuery (?)
+// We want scripts which live alongside this one to see jQuery in the normal way
+window.$ = jq;
+var jqTree = require('jqtree');
+
 var CtApp = function(preNode, data) {
+   
     var self = this;
 
     self.data = data;
@@ -187,36 +194,8 @@ var CtApp = function(preNode, data) {
     }    
 }
 
-/* Annoyingly it seems like we have to have this here otherwise CtApp can't be seen after being browserify'd */
-
-$(document).ready(function() {
-    // Chrome renders text documents inside a faked up <pre> node
-    var preNode = $("pre")[0];
-    var data = preNode.innerHTML;
-
-    var App = new CtApp(preNode, data);
-    
-    // Respond to requests from the extension's main menu
-    chrome.runtime.onMessage.addListener(
-        function(request, sender, sendResponse) {
-            switch(request.msg) {
-            case "TAP_SWITCH_VIEW":
-                App.ui.tapSwitchView();
-                break;
-            }
-        });
-    
-    // Look for a TAP plan (1..N) as evidence that this is TAP data.
-    if(data != null && /1\.\.\d+/.test(data)) {
-        App.reportTapStatus("TAP_START",
-                            function() {
-                                App.processDocument();
-                            }
-                           );
-    } else {
-        App.reportTapStatus("TAP_END", function() {});
-        return;
-    }
-});
-
+/* Annoyingly it seems like we have to have this here for the jasmine tests 
+   otherwise CtApp can't be seen after being browserify'd, because it gets taken out of the global scope */
 window.CtApp = CtApp;
+
+
