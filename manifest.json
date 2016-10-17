@@ -24,7 +24,7 @@
         {
             "css" : [
                 "tap.css",
-                "jqtree.css"],
+                "node_modules/jqtree/jqtree.css"],
             "js" : [
                 "directoryTree.js",
                 "CtAppUi.js",
