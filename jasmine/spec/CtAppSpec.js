@@ -14,10 +14,19 @@ describe("CtApp", function() {
         expect(preNode.hasClass("chrome-tap-invisible")).toBe(true);
     });
 
+    /* These are the unpleasant style of unit tests where the expectation is essentially 'everything', rather than
+       having the salient features pulled out, but they will do for now. */
+    
     it("toolbar should be created", function() {
         var app = new CtApp(preNode, "1..5");
         app.processDocument(body);
         expect($(body.children()[0]).html()).toBe('<ul><li id="chrome-tap-pie"><span>&nbsp;</span></li><li id="chrome-tap-shell"><a href="javascript:void(0)">💻︎</a></li><li id="chrome-tap-next"><a href="javascript:void(0)">Next</a></li><li id="chrome-tap-previous"><a href="javascript:void(0)">Previous</a></li></ul>');
+    });
+
+    it("file path generates correct html", function() {
+        var app = new CtApp(preNode, "1..5\r\n#   at /export/buildbot/slave-mastermind/server_API_general_mastermind/server/api/bin/t/general/../../../../lib/Linguamatics/REST.pm line 1261.");
+        app.processDocument(body);
+        expect($(body.children()[2]).html()).toBe('<div class="chrome-tap-box" style="margin-left: 0px;"><span class="chrome-tap-plan">1..5</span><br><span class="chrome-tap-comment">#   at <span class="chrome-tap-scp" id="ct-link-0">↯</span>/export/buildbot/slave-mastermind/server_API_general_mastermind/server/api/bin/t/general/../../../../lib/Linguamatics/REST.pm line 1261.</span><br></div>');
     });
 });
 
@@ -48,7 +57,12 @@ describe("DirectoryTree", function() {
     
     it("Tree accepts a single path", function() {
         tree.add("/this/that/other/and/more/things");
-        expect(JSON.stringify(tree)).toBe('{"root":{"":{"this":{"that":{"other":{"and":{"more":{"things":{}}}}}}}},"host":"(unset)","hostRegexp":{}}');
+        expect(JSON.stringify(tree.root)).toBe('{"":{"this":{"that":{"other":{"and":{"more":{"things":{}}}}}}}}');
+    });
+
+    it("Tree understands ..", function() {
+        tree.add("/this/that/../and/../things");
+        expect(JSON.stringify(tree.root)).toBe('{"":{"this":{"things":{}}}}');
     });
 
     it("Tree converts to jqtree format correctly", function() {

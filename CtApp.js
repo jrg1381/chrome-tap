@@ -1,7 +1,7 @@
-var jq = require('jquery');
-window.jQuery = jq; // Need to do this so jqTree can see jQuery (?)
-// We want scripts which live alongside this one to see jQuery in the normal way
-window.$ = jq;
+window.jQuery = require('jquery'); // Need to do this so jqTree can see jQuery (?)
+// We want scripts which live alongside this one to see jQuery in the normal way,
+// this is a way of making the module global, as browserify wraps everything up.
+window.$ = window.jQuery;
 var jqTree = require('jqtree');
 
 var CtApp = function(preNode, data) {
@@ -65,7 +65,7 @@ var CtApp = function(preNode, data) {
             url = url.substring(0, url.lastIndexOf("/")+1);
             
             var id = "ct-link-" + (self.spanIdCounter++);
-            var link = "<span class=\"chrome-tap-scp\" id=\"" + id + "\">&#x21af;</span>";
+            var link = '<span class="chrome-tap-scp" id="' + id + '">&#x21af;</span>';
             innerText = innerText.replace(path,link + path);
             self.scpPaths[id] = url;
         }
