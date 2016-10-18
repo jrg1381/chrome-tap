@@ -1,7 +1,7 @@
-var CtAppUi = function(preNode, uiParent) {
+var CtAppUi = function(originalTextPreNode, uiParent) {
     var self = this;
 
-    self.preNode = preNode;
+    self.originalTextPreNode = originalTextPreNode;
     self.body = uiParent;
     self.showingParsedTap = true;
     self.INVISIBLE_CLASS = "chrome-tap-invisible";
@@ -54,10 +54,10 @@ var CtAppUi = function(preNode, uiParent) {
     /* Show/hide the original TAP output */
     CtAppUi.prototype.tapSwitchView = function() {
         if(self.showingParsedTap) {
-            $(self.preNode).removeClass(self.INVISIBLE_CLASS);
+            $(self.originalTextPreNode).removeClass(self.INVISIBLE_CLASS);
             self.parsedOutputContainer.addClass(self.INVISIBLE_CLASS);
         } else {
-            $(self.preNode).addClass(self.INVISIBLE_CLASS);
+            $(self.originalTextPreNode).addClass(self.INVISIBLE_CLASS);
             self.parsedOutputContainer.removeClass(self.INVISIBLE_CLASS);
         }
         self.showingParsedTap = !self.showingParsedTap;

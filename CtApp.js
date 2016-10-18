@@ -4,14 +4,14 @@ window.jQuery = require('jquery'); // Need to do this so jqTree can see jQuery (
 window.$ = window.jQuery;
 var jqTree = require('jqtree');
 
-var CtApp = function(preNode, data, uiParent) {
+var CtApp = function(originalTextPreNode, data, uiParent) {
    
     var self = this;
 
     self.data = data;
     self.body = uiParent;
-    self.preNode = preNode;
-    self.ui = new CtAppUi(preNode, uiParent);
+    self.originalTextPreNode = originalTextPreNode;
+    self.ui = new CtAppUi(originalTextPreNode, uiParent);
     self.parser = require('tap-parser');
     self.directoryTree = new DirectoryTree();
     self.username = "(unset)";
@@ -159,8 +159,8 @@ var CtApp = function(preNode, data, uiParent) {
     }
 
     CtApp.prototype.processDocument = function processDocument() {
-        $(self.preNode).removeAttr('style');
-        $(self.preNode).addClass("chrome-tap-pre chrome-tap-invisible");
+        $(self.originalTextPreNode).removeAttr('style');
+        $(self.originalTextPreNode).addClass("chrome-tap-pre chrome-tap-invisible");
         
         self.ui.addToolbar();
         self.parsedOutputContainer = self.ui.addParsedOutputContainer();

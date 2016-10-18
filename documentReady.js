@@ -1,9 +1,9 @@
 $(document).ready(function() {
     // Chrome renders text documents inside a faked up <pre> node
-    var preNode = $("pre")[0];
-    var data = preNode.innerHTML;
+    var originalTextPreNode = $("pre")[0];
+    var data = originalTextPreNode.innerHTML;
 
-    var App = new CtApp(preNode, data, $("body"));
+    var App = new CtApp(originalTextPreNode, data, $("body"));
     
     // Respond to requests from the extension's main menu
     chrome.runtime.onMessage.addListener(
