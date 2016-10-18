@@ -1,6 +1,7 @@
 var FilenameMatcher = function() {
-    self.scpRegex = new RegExp("(?: |^)(/(?:scratch|export)/buildbot/slave-(.*?)(?:/[^/]+/)+[^ ]+)(?: |$)","g");
-    self.groupCount = 2;
+    var self = this;
+    
+    FilenameMatcher.prototype.scpRegex = new RegExp("(?: |^)(/(?:scratch|export)/buildbot/slave-(.*?)(?:/[^/]+/)+[^ ]+)(?: |$)","g");
     
     FilenameMatcher.prototype.Match = function(input) {
         var matches = { paths : [], hostnames : [] };

@@ -4,7 +4,7 @@ var CtAppUi = function(preNode) {
     self.preNode = preNode;
     self.showingParsedTap = true;
     self.INVISIBLE_CLASS = "chrome-tap-invisible";
-    
+        
     /* Return <span class="spanClass">content</span> as a jQuery object */
     CtAppUi.prototype.spanWithClass = function(contents, spanClass) {
         var span = $("<span class=\""+spanClass+"\"></span>");
@@ -41,12 +41,13 @@ var CtAppUi = function(preNode) {
         body.append(self.treeContainer);
 
         self.menuButton = $("#chrome-tap-shell");
-        
+
         $("#chrome-tap-shell").click(self.showShellPromptMenu);
         $("#chrome-tap-previous").click(self.previousFailure);
         $("#chrome-tap-next").click(self.nextFailure);
 
-        self.testIndicator = $("#chrome-tap-pie");
+        self.testIndicator = body.find("#chrome-tap-pie");
+        self.setTestStatusIndicator(CtAppUi.TEST_STATE.UNKNOWN);
     }
 
     /* Show/hide the original TAP output */
@@ -61,8 +62,13 @@ var CtAppUi = function(preNode) {
         self.showingParsedTap = !self.showingParsedTap;
     }
     
-    CtAppUi.prototype.setTestStatusIndicator = function setTestStatusIndicator(color) {
-        self.testIndicator.css("background-color", color);
+    CtAppUi.prototype.setTestStatusIndicator = function setTestStatusIndicator(status) {
+        var colors = {};
+        colors[CtAppUi.TEST_STATE["PASS"]] = "green";
+        colors[CtAppUi.TEST_STATE["FAIL"]] = "red";
+        colors[CtAppUi.TEST_STATE["UNKNOWN"]] = "purple";
+        // Could do this as a style if we wanted something more complex
+        self.testIndicator.css("background-color", colors[status]);
     }
 
     /* Action to perform when the shell prompt icon is clicked */
@@ -125,4 +131,6 @@ var CtAppUi = function(preNode) {
         return self.parsedOutputContainer;
     }
 }
+
+CtAppUi.TEST_STATE = { "PASS" : 0, "FAIL" : 1, "UNKNOWN" : 2 };
 

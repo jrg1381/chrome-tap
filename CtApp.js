@@ -94,7 +94,6 @@ var CtApp = function(preNode, data) {
         });
         
         tapParser.on('complete', function(results) {
-            self.currentDepth--;
             var current = tapParser.currentBox;
             var parent = tapParser.currentBox.parent();
             
@@ -108,13 +107,15 @@ var CtApp = function(preNode, data) {
             tapParser.currentBox = parent;
             if(self.currentDepth == 0) {
                 if(self.finalResult && results.ok) {
-                    self.ui.setTestStatusIndicator("green");
+                    self.ui.setTestStatusIndicator(CtAppUi.TEST_STATE.PASS);
                     
                 } else {
                     self.finalResult = false;
-                    self.ui.setTestStatusIndicator("red");
+                    self.ui.setTestStatusIndicator(CtAppUi.TEST_STATE.FAIL);
                 }
             }
+            
+            self.currentDepth--;
         });
         
         tapParser.on('plan', function(plan) {
