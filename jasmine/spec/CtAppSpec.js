@@ -40,6 +40,19 @@ describe("CtApp", function() {
         app.processDocument();
         expect($(body).find("#chrome-tap-pie").css("background-color")).toBe('green');
     });
+
+    it("Next and previous buttons are wired up", function() {
+        var app = new CtApp(preNode, "ok 1 a test\r\n1..1", body);
+        app.processDocument();
+
+        spyOn(window, 'find');
+
+        $(body).find("#chrome-tap-next").click();
+        $(body).find("#chrome-tap-previous").click();
+
+        // Worry about the arguments later
+        expect(window.find).toHaveBeenCalledTimes(2);
+    });
 });
 
 describe("FilenameMatcher", function() {
