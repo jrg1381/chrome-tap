@@ -9,8 +9,8 @@ describe("CtApp", function() {
     });
 
     it("original text should be invisible", function() {
-        var app = new CtApp(preNode, "1..5");
-        app.processDocument(body);
+        var app = new CtApp(preNode, "1..5", body);
+        app.processDocument();
         expect(preNode.hasClass("chrome-tap-invisible")).toBe(true);
     });
 
@@ -18,26 +18,26 @@ describe("CtApp", function() {
        having the salient features pulled out, but they will do for now. */
     
     it("toolbar should be created", function() {
-        var app = new CtApp(preNode, "ok 1 a test\r\n1..1");
-        app.processDocument(body);
+        var app = new CtApp(preNode, "ok 1 a test\r\n1..1", body);
+        app.processDocument();
         expect($(body.children()[0]).html()).toBe('<ul><li id="chrome-tap-pie" style="background-color: green;"><span>&nbsp;</span></li><li id="chrome-tap-shell"><a href="javascript:void(0)">💻︎</a></li><li id="chrome-tap-next"><a href="javascript:void(0)">Next</a></li><li id="chrome-tap-previous"><a href="javascript:void(0)">Previous</a></li></ul>');
     });
 
     it("file path generates correct html", function() {
-        var app = new CtApp(preNode, "1..5\r\n#   at /export/buildbot/slave-mastermind/server_API_general_mastermind/server/api/bin/t/general/../../../../lib/Linguamatics/REST.pm line 1261.");
-        app.processDocument(body);
+        var app = new CtApp(preNode, "1..5\r\n#   at /export/buildbot/slave-mastermind/server_API_general_mastermind/server/api/bin/t/general/../../../../lib/Linguamatics/REST.pm line 1261.", body);
+        app.processDocument();
         expect($(body.children()[2]).html()).toBe('<div class="chrome-tap-box" style="margin-left: 0px;"><span class="chrome-tap-plan">1..5</span><br><span class="chrome-tap-comment">#   at <span class="chrome-tap-scp" id="ct-link-0">↯</span>/export/buildbot/slave-mastermind/server_API_general_mastermind/server/api/bin/t/general/../../../../lib/Linguamatics/REST.pm line 1261.</span><br></div>');
     });
 
     it("Failed test is marked failed", function() {
-        var app = new CtApp(preNode, "not ok 1 - test failed\r\n1..1");
-        app.processDocument(body);
+        var app = new CtApp(preNode, "not ok 1 - test failed\r\n1..1", body);
+        app.processDocument();
         expect($(body).find("#chrome-tap-pie").css("background-color")).toBe('red');
     });
 
     it("Passed test is marked passed", function() {
-        var app = new CtApp(preNode, "ok 1 - test passed\r\n# tests 1\r\n# pass 1\r\n1..1\r\n");
-        app.processDocument(body);
+        var app = new CtApp(preNode, "ok 1 - test passed\r\n# tests 1\r\n# pass 1\r\n1..1\r\n", body);
+        app.processDocument();
         expect($(body).find("#chrome-tap-pie").css("background-color")).toBe('green');
     });
 });

@@ -3,7 +3,7 @@ $(document).ready(function() {
     var preNode = $("pre")[0];
     var data = preNode.innerHTML;
 
-    var App = new CtApp(preNode, data);
+    var App = new CtApp(preNode, data, $("body"));
     
     // Respond to requests from the extension's main menu
     chrome.runtime.onMessage.addListener(

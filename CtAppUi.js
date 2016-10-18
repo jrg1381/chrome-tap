@@ -1,7 +1,8 @@
-var CtAppUi = function(preNode) {
+var CtAppUi = function(preNode, uiParent) {
     var self = this;
 
     self.preNode = preNode;
+    self.body = uiParent;
     self.showingParsedTap = true;
     self.INVISIBLE_CLASS = "chrome-tap-invisible";
         
@@ -22,7 +23,7 @@ var CtAppUi = function(preNode) {
         window.find("not ok", true, true, true, false, false, false);
     }
 
-    CtAppUi.prototype.addToolbar = function addToolbar(body) {
+    CtAppUi.prototype.addToolbar = function addToolbar() {
         self.toolbar = $("<div class=\"chrome-tap-toolbar\" id=\"chrome-tap-toolbar\">" 
                          + "<ul>"
                          + "<li id=\"chrome-tap-pie\"><span>&nbsp;</span></li>"
@@ -37,8 +38,8 @@ var CtAppUi = function(preNode) {
         self.treeContainer = $("<div id=\"chrome-tap-tree-container\"></div>");
         self.treeContainer.append(self.tree);
                 
-        body.append(self.toolbar);
-        body.append(self.treeContainer);
+        self.body.append(self.toolbar);
+        self.body.append(self.treeContainer);
 
         self.menuButton = $("#chrome-tap-shell");
 
@@ -46,7 +47,7 @@ var CtAppUi = function(preNode) {
         $("#chrome-tap-previous").click(self.previousFailure);
         $("#chrome-tap-next").click(self.nextFailure);
 
-        self.testIndicator = body.find("#chrome-tap-pie");
+        self.testIndicator = self.body.find("#chrome-tap-pie");
         self.setTestStatusIndicator(CtAppUi.TEST_STATE.UNKNOWN);
     }
 
@@ -125,9 +126,9 @@ var CtAppUi = function(preNode) {
         self.treeContainer.css("top", self.toolbar.height());
     }
 
-    CtAppUi.prototype.addParsedOutputContainer = function addParsedOutputContainer(body) {
+    CtAppUi.prototype.addParsedOutputContainer = function addParsedOutputContainer() {
         self.parsedOutputContainer = $("<div id=\"chrome-tap-parsed-output-boxed\" class=\"chrome-tap-pre\"></div>");
-        body.append(self.parsedOutputContainer);
+        self.body.append(self.parsedOutputContainer);
         return self.parsedOutputContainer;
     }
 }
