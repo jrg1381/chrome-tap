@@ -29,6 +29,14 @@ describe("CtApp", function() {
         expect($(body.children()[2]).html()).toBe('<div class="chrome-tap-box" style="margin-left: 0px;"><span class="chrome-tap-plan">1..5</span><br><span class="chrome-tap-comment">#   at <span class="chrome-tap-scp" id="ct-link-0">↯</span>/export/buildbot/slave-mastermind/server_API_general_mastermind/server/api/bin/t/general/../../../../lib/Linguamatics/REST.pm line 1261.</span><br></div>');
     });
 
+    // !!!!!!!!!!!! This wouldn't be so bad if there were some nicer way of managing the expected value.
+    it("tree menu contains a file tree", function() {
+        var app = new CtApp(preNode, "1..5\r\n#   at /export/buildbot/slave-mastermind/server_API_general_mastermind/server/api/bin/t/general/../../../../lib/Linguamatics/REST.pm line 1261.", body);
+        app.processDocument();
+        expect(app.ui.tree.html()).toBe('<ul class="jqtree_common jqtree-tree" role="tree"><li class="jqtree_common jqtree-folder" role="presentation"><div class="jqtree-element jqtree_common" role="presentation"><a class="jqtree-toggler jqtree_common jqtree-toggler-left" role="presentation" aria-hidden="true">▼</a><span class="jqtree-title jqtree_common jqtree-title-folder" role="treeitem" aria-level="1" aria-selected="false" aria-expanded="true">/</span><span>&nbsp;💻︎</span></div><ul class="jqtree_common " role="group"><li class="jqtree_common jqtree-folder" role="presentation"><div class="jqtree-element jqtree_common" role="presentation"><a class="jqtree-toggler jqtree_common jqtree-toggler-left" role="presentation" aria-hidden="true">▼</a><span class="jqtree-title jqtree_common jqtree-title-folder" role="treeitem" aria-level="2" aria-selected="false" aria-expanded="true">export</span><span>&nbsp;💻︎</span></div><ul class="jqtree_common " role="group"><li class="jqtree_common jqtree-folder" role="presentation"><div class="jqtree-element jqtree_common" role="presentation"><a class="jqtree-toggler jqtree_common jqtree-toggler-left" role="presentation" aria-hidden="true">▼</a><span class="jqtree-title jqtree_common jqtree-title-folder" role="treeitem" aria-level="3" aria-selected="false" aria-expanded="true">buildbot</span><span>&nbsp;💻︎</span></div><ul class="jqtree_common " role="group"><li class="jqtree_common jqtree-folder" role="presentation"><div class="jqtree-element jqtree_common" role="presentation"><a class="jqtree-toggler jqtree_common jqtree-toggler-left" role="presentation" aria-hidden="true">▼</a><span class="jqtree-title jqtree_common jqtree-title-folder" role="treeitem" aria-level="4" aria-selected="false" aria-expanded="true">slave-mastermind</span><span>&nbsp;💻︎</span></div><ul class="jqtree_common " role="group"><li class="jqtree_common jqtree-folder" role="presentation"><div class="jqtree-element jqtree_common" role="presentation"><a class="jqtree-toggler jqtree_common jqtree-toggler-left" role="presentation" aria-hidden="true">▼</a><span class="jqtree-title jqtree_common jqtree-title-folder" role="treeitem" aria-level="5" aria-selected="false" aria-expanded="true">server_API_general_mastermind</span><span>&nbsp;💻︎</span></div><ul class="jqtree_common " role="group"><li class="jqtree_common jqtree-folder jqtree-closed" role="presentation"><div class="jqtree-element jqtree_common" role="presentation"><a class="jqtree-toggler jqtree_common jqtree-closed jqtree-toggler-left" role="presentation" aria-hidden="true">►</a><span class="jqtree-title jqtree_common jqtree-title-folder" role="treeitem" aria-level="6" aria-selected="false" aria-expanded="false">server</span><span>&nbsp;💻︎</span></div><ul class="jqtree_common " role="group"><li class="jqtree_common jqtree-folder jqtree-closed" role="presentation"><div class="jqtree-element jqtree_common" role="presentation"><a class="jqtree-toggler jqtree_common jqtree-closed jqtree-toggler-left" role="presentation" aria-hidden="true">►</a><span class="jqtree-title jqtree_common jqtree-title-folder" role="treeitem" aria-level="7" aria-selected="false" aria-expanded="false">lib</span><span>&nbsp;💻︎</span></div><ul class="jqtree_common " role="group"><li class="jqtree_common" role="presentation"><div class="jqtree-element jqtree_common" role="presentation"><span class="jqtree-title jqtree_common" role="treeitem" aria-level="8" aria-selected="false" aria-expanded="false">Linguamatics</span><span>&nbsp;💻︎</span></div></li></ul></li></ul></li></ul></li></ul></li></ul></li></ul></li></ul></li></ul>');
+    });
+
+    
     it("Failed test is marked failed", function() {
         var app = new CtApp(preNode, "not ok 1 - test failed\r\n1..1", body);
         app.processDocument();
@@ -52,6 +60,15 @@ describe("CtApp", function() {
 
         // Worry about the arguments later
         expect(window.find).toHaveBeenCalledTimes(2);
+    });
+
+    it("Clicking the menu button shows the tree", function() {
+        var app = new CtApp(preNode, "ok 1 a test\r\n1..1", body);
+        app.processDocument();
+
+        expect(app.ui.tree.css("display")).toBe("none");
+        app.ui.menuButton.click();
+        expect(app.ui.tree.css("display")).toBe("");
     });
 });
 
