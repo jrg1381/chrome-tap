@@ -42,10 +42,12 @@ var CtAppUi = function(originalTextPreNode, uiParent) {
         self.body.append(self.treeContainer);
 
         self.menuButton = self.body.find("#chrome-tap-shell");
+        self.toolbarPrevious = self.body.find("#chrome-tap-previous");
+        self.toolbarNext = self.body.find("#chrome-tap-next");
 
         self.menuButton.click(self.showShellPromptMenu);
-        self.body.find("#chrome-tap-previous").click(self.previousFailure);
-        self.body.find("#chrome-tap-next").click(self.nextFailure);
+        self.toolbarPrevious.click(self.previousFailure);
+        self.toolbarNext.click(self.nextFailure);
 
         self.testIndicator = self.body.find("#chrome-tap-pie");
         self.setTestStatusIndicator(CtAppUi.TEST_STATE.UNKNOWN);
