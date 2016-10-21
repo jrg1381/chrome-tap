@@ -7,7 +7,7 @@ Chrome TAP uses browserify to use node modules inside browser javascript.
 
 1. Run `npm install` to get the packages
 2. Get a global installation of browserify via `sudo npm install -g browserify`
-3. Run .\build.sh to build the application
+3. Run ./build.sh to build the application
 4. Load the whole directory into Chrome as an extension
 
 ## Notes
