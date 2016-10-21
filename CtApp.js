@@ -168,30 +168,37 @@ var CtApp = function(originalTextPreNode, data, uiParent) {
         var currentBox = self.boxAtIndent(0);
         self.parsedOutputContainer.append(currentBox);
         
-        var p = new self.parser({preserveWhitespace : true});
-        
-        p.currentBox = currentBox;
-        self.addEventHandlers(p);
-        
-        p.write(self.data);
-        p.end();
-        
-        for(var key in self.scpPaths) {
-            var value = self.scpPaths[key];
-            function clickHandlerMaker(x) {
-                return function() {
-                    document.location = x;
-                    console.log("Navigating to " + x);
-                };
-            };
-            
-            var element = $("#" + key);
-            element.click(clickHandlerMaker(value));
-            element.attr('title', value);
-        }
-        
-        var treeData = self.directoryTree.convertForJqTree();
-        self.ui.addTreeData(treeData, self.username, self.directoryTree.host);
+        var promise = new Promise(function(resolve, reject) {
+            setTimeout(function() {
+                var p = new self.parser({preserveWhitespace : true});
+
+                p.currentBox = currentBox;
+                self.addEventHandlers(p);
+
+                p.write(self.data);
+                p.end();
+
+                for(var key in self.scpPaths) {
+                    var value = self.scpPaths[key];
+                    function clickHandlerMaker(x) {
+                        return function() {
+                            document.location = x;
+                            console.log("Navigating to " + x);
+                        };
+                    };
+
+                    var element = $("#" + key);
+                    element.click(clickHandlerMaker(value));
+                    element.attr('title', value);
+                }
+
+                var treeData = self.directoryTree.convertForJqTree();
+                self.ui.addTreeData(treeData, self.username, self.directoryTree.host);
+                resolve();
+            }, 0);
+        });
+
+        return promise;
     }    
 }
 
