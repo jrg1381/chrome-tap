@@ -21,7 +21,7 @@ As regular node users probably know, but it was new to me, some Linux systems ha
 to
 
 ```
-#!/usr/bin/env nodjs
+#!/usr/bin/env nodejs
 ```
 
 ## Testing
