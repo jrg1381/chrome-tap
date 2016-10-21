@@ -26,6 +26,6 @@ to
 
 ## Testing
 
-You can open the html file `./jasmine/SpecRunner.html` to run the jasmine-based unit tests.
+You can open the html file `./jasmine/SpecRunner.html` (in Chrome, obviously!) to run the jasmine-based unit tests.
 
 
