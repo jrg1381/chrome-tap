@@ -120,6 +120,7 @@ var CtAppUi = function(originalTextPreNode, uiParent) {
                   
                   var span = $('<span>&nbsp;&#x1f4bb;&#xfe0e;</span>');
                   span.click(function() { document.location = link; });
+                  span.attr("title", link);
                   $li.find('.jqtree-title').after(span);
               },
               selectable : false
