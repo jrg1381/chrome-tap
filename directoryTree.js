@@ -42,7 +42,9 @@ var DirectoryTree = function() {
     DirectoryTree.prototype.probablyFilename = function(filename) {
         var probablyFileExtensions = ["json","zip","out","log","xml","pm","t","txt","html"];
         return probablyFileExtensions.some(function(element, index, array) {
-            return filename.endsWith("." + element);
+            var extension = "." + element;
+            // Sometimes the paths are quoted so the perceived extension is .txt' or similar.
+            return filename.endsWith(extension) || filename.endsWith(extension + "'");
         });
     }
     
