@@ -5,9 +5,9 @@ window.$ = window.jQuery;
 var jqTree = require('jqtree');
 
 var CtApp = function(originalTextPreNode, data, uiParent) {
-   
+    
     var self = this;
-
+    
     self.data = data;
     self.body = uiParent;
     self.originalTextPreNode = originalTextPreNode;
@@ -33,51 +33,51 @@ var CtApp = function(originalTextPreNode, data, uiParent) {
                                        self.username = response.config.username;
                                        processDocumentCallback();
                                    });
-    }
+    };
 
     /* Return the class to use for assertions. */
     CtApp.prototype.okOrNotOkClass = function okOrNotOkClass(pass) {
         return pass ? "chrome-tap-ok" : "chrome-tap-not-ok";
-    }
+    };
 
     CtApp.prototype.boxAtIndent = function boxAtIndent(level) {
         var currentBox = $("<div class=\"chrome-tap-box\"></div>");
         currentBox.css("margin-left",level*self.indentDepthPixels+"px");
         return currentBox;
-    }
+    };
 
     CtApp.prototype.pathToScpUrlLink = function pathToScpUrlLink(path, parentDOMItem) {
         var regexMatches = self.filenameMatcher.Match(path);
         var innerText = parentDOMItem.text();
         
         for(var i=0;i<regexMatches.paths.length;i++) {
-            var path = regexMatches.paths[i];
-            var host = regexMatches.hostnames[i];
+            var currentPath = regexMatches.paths[i];
+            var currentHost = regexMatches.hostnames[i];
             
-            self.directoryTree.add(path);
+            self.directoryTree.add(currentPath);
             
-            var url = "scp://"
-                + self.username
-                + "@"
-                + host
-                + path;
+            var url = "scp://" +
+                self.username  +
+                "@"            +
+                currentHost    +
+                currentPath;
             
             // Chop off the filename (but this is wrong if the path actually is a directory...)
             url = url.substring(0, url.lastIndexOf("/")+1);
             
             var id = "ct-link-" + (self.spanIdCounter++);
             var link = '<span class="chrome-tap-scp" id="' + id + '">&#x21af;</span>';
-            innerText = innerText.replace(path,link + path);
+            innerText = innerText.replace(currentPath, link + currentPath);
             self.scpPaths[id] = url;
         }
         
         parentDOMItem.html(innerText);
-    }
+    };
 
     CtApp.prototype.addLineToBox = function(box, line) {
         box.append(line);
         box.append($("<br>"));
-    }
+    };
     
     CtApp.prototype.addEventHandlers = function addEventHandlers(tapParser) {      
         tapParser.on('comment', function(comment) {
@@ -106,7 +106,7 @@ var CtApp = function(originalTextPreNode, data, uiParent) {
             }
             
             tapParser.currentBox = parent;
-            if(self.currentDepth == 0) {
+            if(self.currentDepth === 0) {
                 if(self.finalResult && results.ok) {
                     self.ui.setTestStatusIndicator(CtAppUi.TEST_STATE.PASS);
                     
@@ -156,9 +156,16 @@ var CtApp = function(originalTextPreNode, data, uiParent) {
             childParser.currentBox = newBox;
             self.addEventHandlers(childParser);
         });
-    }
+    };
 
     CtApp.prototype.processDocument = function processDocument() {
+        function clickHandlerMaker(url) {
+            return function() {
+                document.location = url;
+                console.log("Navigating to " + url);
+            };
+        }
+        
         $(self.originalTextPreNode).removeAttr('style');
         $(self.originalTextPreNode).addClass("chrome-tap-pre chrome-tap-invisible");
         
@@ -179,17 +186,12 @@ var CtApp = function(originalTextPreNode, data, uiParent) {
                 p.end();
 
                 for(var key in self.scpPaths) {
-                    var value = self.scpPaths[key];
-                    function clickHandlerMaker(x) {
-                        return function() {
-                            document.location = x;
-                            console.log("Navigating to " + x);
-                        };
-                    };
-
-                    var element = $("#" + key);
-                    element.click(clickHandlerMaker(value));
-                    element.attr('title', value);
+                    if(self.scpPaths.hasOwnProperty(key)) {
+                        var value = self.scpPaths[key];
+                        var element = $("#" + key);
+                        element.click(clickHandlerMaker(value));
+                        element.attr('title', value);
+                    }
                 }
 
                 var treeData = self.directoryTree.convertForJqTree();
@@ -199,11 +201,9 @@ var CtApp = function(originalTextPreNode, data, uiParent) {
         });
 
         return promise;
-    }    
-}
+    };
+};
 
 /* Annoyingly it seems like we have to have this here for the jasmine tests 
    otherwise CtApp can't be seen after being browserify'd, because it gets taken out of the global scope */
 window.CtApp = CtApp;
-
-
