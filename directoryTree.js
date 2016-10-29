@@ -10,7 +10,7 @@ var DirectoryTree = function() {
             node[pathElement] = {};
         }
         return node[pathElement];
-    }
+    };
 
     // Given a path that looks like foo/bar/baz, add the elements to the directory tree
     // such that if foo/bar has already been seen, it will not be added again. The intent
@@ -32,35 +32,34 @@ var DirectoryTree = function() {
         
         filteredPathElements.forEach(function(element, index, array) {            
             var matches = element.match(self.hostRegexp);
-            if(matches != null && matches.length > 0) {
+            if(matches !== null && matches.length > 0) {
                 self.host = matches[1];
             }
             currentNode = self.addToNode(element, currentNode);
         });
-    }
+    };
 
     DirectoryTree.prototype.probablyFilename = function(filename) {
-        var probablyFileExtensions = ["json","zip","out","log","xml","pm","t","txt","html"];
+        var probablyFileExtensions = ["json","zip","out","log","xml","pm","t","txt","html","pub"];
         return probablyFileExtensions.some(function(element, index, array) {
             var extension = "." + element;
             // Sometimes the paths are quoted so the perceived extension is .txt' or similar.
             return filename.endsWith(extension) || filename.endsWith(extension + "'");
         });
-    }
+    };
     
     DirectoryTree.prototype.depthFirstTraversal = function(root, parentNode) { 
         for(var child in root) {
             // Make the wild guess that filenames with . in them are files, not directories,
             // but use a whitelist so we don't trip on things like "results.default"
             if(self.probablyFilename(child)) {
-//                console.log(child);
                 continue;
             }
             var newNode = { name : child, children: [] };
             parentNode.children.push(newNode);
             self.depthFirstTraversal(root[child], newNode);
         }
-    }
+    };
     
     DirectoryTree.prototype.convertForJqTree = function() {
         var data = {name : "/", children: []};
@@ -68,5 +67,5 @@ var DirectoryTree = function() {
         // It has to be in an array to represent multiple top-level nodes to jqTree.
         // As we're a filesystem we only have /, so wrap the object in an array here to keep jqTree happy.
         return [data];
-    }
-}
+    };
+};

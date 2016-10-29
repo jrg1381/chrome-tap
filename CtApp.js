@@ -62,7 +62,8 @@ var CtApp = function(originalTextPreNode, data, uiParent) {
                 currentHost    +
                 currentPath;
             
-            // Chop off the filename (but this is wrong if the path actually is a directory...)
+            // Chop off the filename (but this is wrong if the path actually
+            // is a directory...)
             url = url.substring(0, url.lastIndexOf("/")+1);
             
             var id = "ct-link-" + (self.spanIdCounter++);
@@ -98,7 +99,8 @@ var CtApp = function(originalTextPreNode, data, uiParent) {
             var current = tapParser.currentBox;
             var parent = tapParser.currentBox.parent();
             
-            // The plan is to mark the parents as having failed children, but this isn't used for anything yet
+            // The plan is to mark the parents as having failed children,
+            // but this isn't used for anything yet
             if(current.hasClass("chrome-tap-failed") &&
                !parent.hasClass("chrome-tap-failed"))
             {
@@ -151,7 +153,7 @@ var CtApp = function(originalTextPreNode, data, uiParent) {
         
         tapParser.on('child', function(childParser) {
             self.currentDepth++;
-            newBox = self.boxAtIndent(self.currentDepth);
+            var newBox = self.boxAtIndent(self.currentDepth);
             tapParser.currentBox.append(newBox);
             childParser.currentBox = newBox;
             self.addEventHandlers(childParser);
@@ -205,5 +207,6 @@ var CtApp = function(originalTextPreNode, data, uiParent) {
 };
 
 /* Annoyingly it seems like we have to have this here for the jasmine tests 
-   otherwise CtApp can't be seen after being browserify'd, because it gets taken out of the global scope */
+   otherwise CtApp can't be seen after being browserify'd, because it gets taken 
+   out of the global scope */
 window.CtApp = CtApp;

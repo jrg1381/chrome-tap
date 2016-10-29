@@ -8,11 +8,11 @@ var FilenameMatcher = function() {
         
         var match; // Needs this scope for while loop to find successive matches
         
-        while(match = self.scpRegex.exec(input)) {
+        while((match = self.scpRegex.exec(input)) !== null) {
             matches.paths.push(match[1]);
             matches.hostnames.push(match[2]);
         }
 
         return matches;
-    }  
-}
+    };
+};

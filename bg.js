@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     chrome.storage.sync.get("username", function(items) {
         answer.config = { username : items.username };
         sendResponse(answer);
-    })
+    });
 
     return true;
 });
@@ -42,9 +42,9 @@ function disableUI(tabId) {
 function sendMessage(message, data) {
     chrome.tabs.query({active:true,currentWindow:true}, function(tabs) {
 	if(tabs.length > 0) {
-	    chrome.tabs.sendMessage(tabs[0].id, {msg : message, data : data}, null);
+            chrome.tabs.sendMessage(tabs[0].id, {msg : message, data : data}, null);
 	} else {
-	    console.log("No active tabs, not sending " + message);
+            console.log("No active tabs, not sending " + message);
 	}
     });
 }
