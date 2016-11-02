@@ -1,5 +1,5 @@
 # chrome-tap
-Chrome extension for processing Test Anything Protocol
+Chrome extension for processing Test Anything Protocol. Only really useful for my co-workers...
 
 ## Building
 
