@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cd $(dirname $(realpath $0))
+
 npm install
 
 if [ -z $(which browserify) ]; then
@@ -8,3 +10,18 @@ if [ -z $(which browserify) ]; then
 fi
 
 browserify CtApp.js -o CtAppBundle.js
+
+if [ ! -d "build" ]; then
+    mkdir build
+else
+    rm build/*
+fi
+
+cp manifest.json LICENSE *.js *.css *.html *.png build
+# Because it's already included in CtAppBundle.js
+rm build/CtApp.js
+
+rm -f build/chrome-tap.zip
+# -j => junk the paths
+zip -j build/chrome-tap.zip build/*
+
