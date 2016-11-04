@@ -43,9 +43,9 @@ var CtAppUi = function(originalTextPreNode, uiParent) {
 
         self.treeContainer = $("<div id=\"chrome-tap-tree-container\"></div>");
         self.treeContainer.append(self.tree);
-                
-        self.body.append(self.toolbar);
-        self.body.append(self.treeContainer);
+
+        self.body.prepend(self.treeContainer);
+        self.body.prepend(self.toolbar);
 
         self.menuButton = self.body.find("#chrome-tap-shell");
         self.toolbarPrevious = self.body.find("#chrome-tap-previous");
