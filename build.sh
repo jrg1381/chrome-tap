@@ -17,7 +17,7 @@ else
     rm build/*
 fi
 
-if [ ! -z $(which phantomjs) -a ! -z $(which phantom-jasmine) ]; then
+if [ ! -x $(which phantomjs) -a ! -x $(which phantom-jasmine) ]; then
     echo "Tests will not run"
 fi
 
@@ -26,6 +26,8 @@ cp node_modules/jqtree/jqtree.css manifest.json LICENSE *.js *.css *.html *.png 
 rm build/CtApp.js
 # Don't need the gruntfile in there
 rm build/Gruntfile.js
+
+grunt
 
 rm -f build/chrome-tap.zip
 # -j => junk the paths
