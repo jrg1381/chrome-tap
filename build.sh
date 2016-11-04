@@ -21,7 +21,7 @@ if [ ! -z $(which phantomjs) -a ! -z $(which phantom-jasmine) ]; then
     echo "Tests will not run"
 fi
 
-cp manifest.json LICENSE *.js *.css *.html *.png build
+cp node_modules/jqtree/jqtree.css manifest.json LICENSE *.js *.css *.html *.png build
 # Because it's already included in CtAppBundle.js
 rm build/CtApp.js
 # Don't need the gruntfile in there
