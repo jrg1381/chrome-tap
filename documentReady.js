@@ -16,7 +16,7 @@ $(document).ready(function() {
         });
     
     // Look for a TAP plan (1..N) as evidence that this is TAP data.
-    if(data != null && /1\.\.\d+/.test(data)) {
+    if(data !== null && /1\.\.\d+/.test(data)) {
         App.reportTapStatus("TAP_START",
                             function() {
                                 App.processDocument();
