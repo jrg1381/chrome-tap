@@ -9,7 +9,6 @@ var CtApp = function(originalTextPreNode, data, uiParent) {
 
     self.data = data;
     self.body = uiParent;
-    self.originalTextPreNode = originalTextPreNode;
     self.ui = new CtAppUi(originalTextPreNode, uiParent);
     self.parser = require('tap-parser');
     self.directoryTree = new DirectoryTree();
@@ -177,9 +176,7 @@ var CtApp = function(originalTextPreNode, data, uiParent) {
             };
         }
 
-        $(self.originalTextPreNode).removeAttr('style');
-        $(self.originalTextPreNode).addClass("chrome-tap-pre chrome-tap-invisible");
-
+        self.ui.hideOriginalText();
         self.ui.addToolbar();
         self.parsedOutputContainer = self.ui.addParsedOutputContainer();
 

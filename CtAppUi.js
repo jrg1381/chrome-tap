@@ -13,6 +13,12 @@ var CtAppUi = function(originalTextPreNode, uiParent) {
         return span;
     };
 
+    /* hide the original TAP data */
+    CtAppUi.prototype.hideOriginalText = function () {
+        $(self.originalTextPreNode).removeAttr('style');
+        $(self.originalTextPreNode).addClass("chrome-tap-pre chrome-tap-invisible");
+    };
+    
     /* Action to perform when the 'Next' button is clicked */
     CtAppUi.prototype.nextFailure = function tapNextFailure() {
         window.find("not ok", true, false, true, false, false, false);
