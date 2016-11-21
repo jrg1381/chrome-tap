@@ -16,7 +16,8 @@ var CtAppUi = function(originalTextPreNode, uiParent) {
     /* hide the original TAP data */
     CtAppUi.prototype.hideOriginalText = function () {
         $(self.originalTextPreNode).removeAttr('style');
-        $(self.originalTextPreNode).addClass("chrome-tap-pre chrome-tap-invisible");
+        $(self.originalTextPreNode).addClass("chrome-tap-pre");
+        $(self.originalTextPreNode).addClass(self.INVISIBLE_CLASS);
     };
     
     /* Action to perform when the 'Next' button is clicked */
